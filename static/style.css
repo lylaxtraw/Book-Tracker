@@ -113,32 +113,32 @@ a { color: var(--flame-bright); }
 
 /* Shark swims upward from bottom */
 .splash__shark {
-  width: 100px;
+  width: clamp(120px, 30vw, 180px);
   height: auto;
-  filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.5));
+  filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
   opacity: 0;
   /* Swims up: starts at bottom of screen, ends at center-top */
-  animation: swimUp 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+  animation: swimUp 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
 }
 
 @keyframes swimUp {
   0% {
     opacity: 0;
-    transform: translateY(300px) scale(0.8);
+    transform: translateY(350px) scale(0.7);
     filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0));
   }
   20% {
-    opacity: 0.6;
+    opacity: 0.7;
   }
   50% {
-    opacity: 0.85;
+    opacity: 0.9;
     transform: translateY(0) scale(1);
-    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.5));
+    filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
   }
   100% {
-    opacity: 0.85;
-    transform: translateY(-120px) scale(1);
-    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.3));
+    opacity: 0.9;
+    transform: translateY(-100px) scale(1);
+    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.4));
   }
 }
 
@@ -151,7 +151,7 @@ a { color: var(--flame-bright); }
   text-align: center;
   padding: 0 24px;
   opacity: 0;
-  animation: revealeContent 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s forwards;
+  animation: revealeContent 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
 }
 
 @keyframes revealeContent {
@@ -194,7 +194,7 @@ a { color: var(--flame-bright); }
   background: linear-gradient(90deg, transparent, var(--flame), transparent);
   margin-top: 16px;
   opacity: 0;
-  animation: revealeContent 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.8s forwards;
+  animation: revealeContent 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

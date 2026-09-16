@@ -107,8 +107,8 @@ function runSplash() {
     // then fade out and resolve
     setTimeout(() => {
       splash.classList.add("is-leaving");
-      setTimeout(() => { splash.remove(); resolve(); }, 520);
-    }, 5200);
+      setTimeout(() => { splash.remove(); resolve(); }, 500);
+    }, 3200);
   });
 }
 
