@@ -94,14 +94,20 @@ const tagById = (id) => state.tags.find((t) => t.id === id);
 
 function showTransition() {
   const transition = $("#transition");
+  console.log("🦈 showTransition() called, showing transition...");
   transition.hidden = false;
 
   return new Promise((resolve) => {
     // Wait for the beautiful shark animation + text to stay visible for 5 seconds,
     // then fade out and resolve
     setTimeout(() => {
+      console.log("🦈 showTransition() 5.5s elapsed, adding is-leaving class...");
       transition.classList.add("is-leaving");
-      setTimeout(() => { transition.hidden = true; resolve(); }, 500);
+      setTimeout(() => { 
+        console.log("🦈 showTransition() 0.5s fade completed, hiding transition and resolving");
+        transition.hidden = true; 
+        resolve(); 
+      }, 500);
     }, 5500);
   });
 }
@@ -958,8 +964,13 @@ async function refreshTags() {
 }
 
 async function boot() {
+  console.log("📚 boot() starting...");
   const session = await api("/api/auth/session");
-  if (!session.authenticated) return showLogin();
+  console.log("📚 Session check complete:", session);
+  if (!session.authenticated) {
+    console.log("📚 Not authenticated, showing login");
+    return showLogin();
+  }
 
   // Setup branding and preferences BEFORE showing transition
   state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
@@ -978,14 +989,18 @@ async function boot() {
   $("#libViewToggle").textContent = "Grid";
 
   // Load data while transition plays
+  console.log("📚 Loading data (tags + books)...");
   await Promise.all([
     refreshTags(),
     loadBooks()
   ]);
+  console.log("📚 Data loaded, now showing transition...");
 
   // Show the beautiful transition, and only show app after it completes
   await showTransition();
+  console.log("📚 Transition complete, showing app...");
   $("#app").hidden = false;
+  console.log("📚 App is now visible!");
 }
 
 /* -------------------------------------------------------------- listeners */
