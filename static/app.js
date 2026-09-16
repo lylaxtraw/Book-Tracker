@@ -94,11 +94,10 @@ const tagById = (id) => state.tags.find((t) => t.id === id);
 
 function runSplash() {
   const splash = $("#splash");
-  // sessionStorage, not localStorage: once per app launch, not once ever.
-  const seen = sessionStorage.getItem("splashSeen") === "1";
+  // Always show splash unless explicitly disabled in preferences
   const wanted = state.prefs["splash.enabled"] !== "false";
 
-  if (seen || !wanted) {
+  if (!wanted) {
     splash.remove();
     return Promise.resolve();
   }
@@ -108,7 +107,6 @@ function runSplash() {
     // then fade out and resolve
     setTimeout(() => {
       splash.classList.add("is-leaving");
-      sessionStorage.setItem("splashSeen", "1");
       setTimeout(() => { splash.remove(); resolve(); }, 520);
     }, 5200);
   });
@@ -1108,7 +1106,6 @@ function wire() {
 
   $("#logoutBtn").addEventListener("click", async () => {
     await api("/api/auth/logout", { method: "POST" });
-    sessionStorage.removeItem("splashSeen");
     location.reload();
   });
 
