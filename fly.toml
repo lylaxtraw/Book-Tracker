@@ -1,17 +1,16 @@
-# Fly.io deployment. Rename app to something unique before `fly launch --no-deploy`.
-app = "cherrystraw-bookmark"
-primary_region = "qro"   # Querétaro -- nearest region to Veracruz
+# Fly.io deployment for Book Tracker
+app = "boocker"
+primary_region = "dfw"   # Dallas, Texas -- best for Mexico
 
 [build]
   dockerfile = "Dockerfile"
 
 [env]
   SECURE_COOKIES = "true"
-  DATABASE_URL = "sqlite:////data/booktracker.db"
 
 # The library lives here. Without this the database is wiped on every deploy.
 [[mounts]]
-  source = "bookmark_data"
+  source = "data"
   destination = "/data"
 
 [http_service]

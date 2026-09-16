@@ -274,6 +274,17 @@ async def import_csv(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="That file has no header row."
         )
+    fieldnames = {
+        ALIASES.get(clean, clean)
+        for key in reader.fieldnames
+        if key is not None
+        for clean in [key.strip().lower()]
+    }
+    if "title" not in fieldnames:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That file needs a column called 'title'. Export one first to see the format.",
+        )
 
     created = skipped = 0
     errors: list[str] = []

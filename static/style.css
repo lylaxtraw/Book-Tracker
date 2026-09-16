@@ -6,7 +6,7 @@
    eyes against near-black. That is exactly a dark interface: near-black paper,
    violet as the single accent that means "active", gold reserved for ratings
    and goals so it stays rare enough to feel like a highlight. The ocean only
-   appears on the splash and behind the empty states -- deep water, not a
+   appears on the transition and behind the empty states -- deep water, not a
    beach.
    ========================================================================= */
 
@@ -33,7 +33,7 @@
   --wax-2:       #bdb0cc;
   --wax-3:       #7d7091;
 
-  /* Deep water, for the splash and empty states. */
+  /* Deep water, for the transition and empty states. */
   --abyssal:     #061e2a;
   --current:     #0e4a5e;
   --shark:       #5d8496;
@@ -86,129 +86,129 @@ a { color: var(--flame-bright); }
 [hidden] { display: none !important; }
 
 /* =========================================================================
-   Splash
+   Transition: shark animation between login and app
    ========================================================================= */
 
-#splash {
+#transition {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(180deg, #082430 0%, #061a26 45%, #040c16 100%);
-  transition: opacity 700ms ease, visibility 700ms;
+  background: linear-gradient(180deg, #061a26 0%, #040c16 50%, #0a0612 100%);
+  transition: opacity 500ms ease, visibility 500ms;
 }
 
-#splash.is-leaving { opacity: 0; visibility: hidden; }
+#transition.is-leaving { opacity: 0; visibility: hidden; }
 
-.splash__water {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-/* Two slow, offset light bands read as caustics without any images. */
-.splash__caustic {
-  position: absolute;
-  inset: -30%;
-  background:
-    repeating-linear-gradient(
-      104deg,
-      transparent 0 44px,
-      rgba(150, 220, 240, 0.055) 44px 66px,
-      transparent 66px 118px
-    );
-  animation: drift 19s linear infinite;
-}
-.splash__caustic--slow {
-  background:
-    repeating-linear-gradient(
-      72deg,
-      transparent 0 70px,
-      rgba(120, 200, 230, 0.04) 70px 96px,
-      transparent 96px 180px
-    );
-  animation: drift 31s linear infinite reverse;
-}
-
-@keyframes drift {
-  from { transform: translate3d(-8%, -4%, 0); }
-  to   { transform: translate3d(8%, 4%, 0); }
-}
-
-/* The shark. One silhouette, crossing once, low in the frame. */
-.splash__shark {
-  position: absolute;
-  bottom: 17%;
-  left: -32%;
-  width: 190px;
-  opacity: 0;
-  fill: var(--shark);
-  animation: swim 6.2s cubic-bezier(0.33, 0, 0.5, 1) 0.5s forwards;
-}
-
-@keyframes swim {
-  0%   { transform: translateX(0)     translateY(0)    scale(0.86); opacity: 0; }
-  14%  { opacity: 0.34; }
-  50%  { transform: translateX(78vw)  translateY(-14px) scale(1);    opacity: 0.30; }
-  86%  { opacity: 0.16; }
-  100% { transform: translateX(150vw) translateY(6px)  scale(0.92); opacity: 0; }
-}
-
-.splash__mark {
+.transition__scene {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  height: 100vh;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Shark swims upward from bottom */
+.transition__shark {
+  width: clamp(140px, 35vw, 200px);
+  height: auto;
+  filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
+  opacity: 0;
+  /* Swims up: starts at bottom of screen, ends at center-top */
+  animation: swimUp 3.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
+}
+
+@keyframes swimUp {
+  0% {
+    opacity: 0;
+    transform: translateY(350px) scale(0.7);
+    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0));
+  }
+  15% {
+    opacity: 0.7;
+  }
+  45% {
+    opacity: 0.9;
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(-100px) scale(1);
+    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.4));
+  }
+}
+
+/* Text content: brand and dedication */
+.transition__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
   text-align: center;
   padding: 0 24px;
-}
-
-.splash__brand {
-  font-family: var(--font-display);
-  font-size: clamp(2.3rem, 11vw, 3.6rem);
-  letter-spacing: 0.012em;
-  margin: 0;
-  color: #f6efe4;
-  text-shadow: 0 0 34px rgba(160, 210, 230, 0.35);
   opacity: 0;
-  animation: rise 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) 300ms forwards;
+  animation: revealeContent 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards;
 }
 
-.splash__dedication {
+@keyframes revealeContent {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.transition__brand {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 10vw, 3.2rem);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  margin: 0;
+  color: #f2ece1;
+  text-shadow: 0 2px 12px rgba(138, 111, 232, 0.2);
+}
+
+.transition__dedication {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(0.92rem, 3.6vw, 1.05rem);
-  margin: 12px 0 0;
-  color: rgba(224, 236, 240, 0.72);
+  font-size: clamp(0.85rem, 3vw, 0.95rem);
+  font-weight: 300;
+  margin: 8px 0 0;
+  color: rgba(224, 236, 240, 0.65);
+  letter-spacing: 0.01em;
+}
+
+/* Small violet accent line */
+.transition__accent {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--flame), transparent);
+  margin-top: 16px;
   opacity: 0;
-  animation: rise 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) 1150ms forwards;
-}
-
-/* A last violet pulse: the water gives way to the flame. */
-.splash__flame {
-  margin: 26px auto 0;
-  width: 3px;
-  height: 0;
-  border-radius: 3px;
-  background: linear-gradient(180deg, var(--flame-bright), var(--flame));
-  box-shadow: 0 0 22px var(--flame-glow);
-  animation: kindle 1100ms ease-out 2100ms forwards;
-}
-
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); filter: blur(5px); }
-  to   { opacity: 1; transform: none;             filter: none; }
-}
-
-@keyframes kindle {
-  from { height: 0;    opacity: 0; }
-  60%  { height: 30px; opacity: 1; }
-  to   { height: 22px; opacity: 0.85; }
+  animation: revealeContent 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.4s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash__caustic, .splash__shark { animation: none; }
-  .splash__brand, .splash__dedication { animation-duration: 1ms; opacity: 1; }
-  .splash__flame { animation: none; height: 22px; }
+  .transition__shark,
+  .transition__content {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .transition__accent { opacity: 1; }
 }
 
 /* =========================================================================

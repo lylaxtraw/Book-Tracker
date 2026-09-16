@@ -1,6 +1,6 @@
 {
-  "name": "Bookmark",
-  "short_name": "Bookmark",
+  "name": "Boocker",
+  "short_name": "Boocker",
   "description": "A quiet place to keep every book you own, want and have read.",
   "start_url": "/",
   "scope": "/",

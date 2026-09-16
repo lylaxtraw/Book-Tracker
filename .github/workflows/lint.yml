@@ -37,9 +37,15 @@ jobs:
     
     - name: Run ruff format check
       run: |
-        ruff format --check app/ tests/ --exit-zero
+        set +e
+        ruff format --check app/ tests/
+        status=$?
+        set -e
+        if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then
+          exit "$status"
+        fi
     
     - name: Run mypy type checking
       run: |
-        mypy app/ --ignore-missing-imports --exit-code=0
+        mypy app/ --ignore-missing-imports
       continue-on-error: true

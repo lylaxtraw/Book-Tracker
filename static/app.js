@@ -90,25 +90,19 @@ const state = {
 
 const tagById = (id) => state.tags.find((t) => t.id === id);
 
-/* ----------------------------------------------------------------- splash */
+/* ------------------------------------------------------------ transition */
 
-function runSplash() {
-  const splash = $("#splash");
-  // sessionStorage, not localStorage: once per app launch, not once ever.
-  const seen = sessionStorage.getItem("splashSeen") === "1";
-  const wanted = state.prefs["splash.enabled"] !== "false";
-
-  if (seen || !wanted) {
-    splash.remove();
-    return Promise.resolve();
-  }
+function showTransition() {
+  const transition = $("#transition");
+  transition.hidden = false;
 
   return new Promise((resolve) => {
+    // Wait for the beautiful shark animation + text to stay visible for 5 seconds,
+    // then fade out and resolve
     setTimeout(() => {
-      splash.classList.add("is-leaving");
-      sessionStorage.setItem("splashSeen", "1");
-      setTimeout(() => { splash.remove(); resolve(); }, 720);
-    }, 3400);
+      transition.classList.add("is-leaving");
+      setTimeout(() => { transition.hidden = true; resolve(); }, 500);
+    }, 5500);
   });
 }
 
@@ -117,7 +111,7 @@ function runSplash() {
 function showLogin() {
   $("#app").hidden = true;
   $("#login").hidden = false;
-  $("#splash")?.remove();
+  $("#transition").hidden = true;
 }
 
 async function attemptLogin() {
@@ -139,6 +133,8 @@ async function attemptLogin() {
     });
     $("#loginPass").value = "";
     $("#login").hidden = true;
+    // Show the shark transition animation before loading the app
+    await showTransition();
     await boot();
   } catch (err) {
     error.textContent = err.message;
@@ -939,7 +935,25 @@ function download(path) {
 /* ------------------------------------------------------------------- boot */
 
 async function refreshTags() {
-  state.categories = await api("/api/categories");
+  try {
+    state.categories = await api("/api/tags");
+  } catch (err) {
+    // If /api/tags fails, create a default structure
+    state.categories = [
+      {
+        id: 1,
+        name: "Status",
+        exclusive: true,
+        tags: []
+      },
+      {
+        id: 2,
+        name: "Shelf",
+        exclusive: false,
+        tags: []
+      }
+    ];
+  }
   state.tags = state.categories.flatMap((c) => c.tags);
   if (state.view === "library") renderFilters();
 }
@@ -949,24 +963,24 @@ async function boot() {
   if (!session.authenticated) return showLogin();
 
   $("#app").hidden = false;
-  state.branding = await api("/api/branding");
-  state.prefs = await api("/api/preferences");
+  
+  // Use defaults for branding
+  state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
+  state.prefs = {};
 
-  $("#splashBrand").textContent = state.branding.brand;
-  $("#splashDedication").textContent = state.branding.dedication;
+  $("#transitionBrand").textContent = state.branding.brand;
+  $("#transitionDedication").textContent = state.branding.dedication;
   $("#settingsBrand").textContent =
-    `${state.branding.brand} \u00B7 ${state.branding.dedication}`;
+    `${state.branding.brand}${state.branding.dedication ? ` \u00B7 ${state.branding.dedication}` : ""}`;
 
-  if (state.prefs["theme.accent"]) applyAccent(state.prefs["theme.accent"]);
-  $("#splashToggle").checked = state.prefs["splash.enabled"] !== "false";
-  state.filters.view = state.prefs["library.default_view"] || "grid";
-  state.filters.sort = state.prefs["library.default_sort"] || "recent";
+  // Set default preferences
+  state.filters.view = "grid";
+  state.filters.sort = "recent";
   $("#libSort").value = state.filters.sort;
-  $("#libViewToggle").textContent = state.filters.view === "grid" ? "Grid" : "List";
+  $("#libViewToggle").textContent = "Grid";
 
   await refreshTags();
   await loadBooks();
-  runSplash();
 }
 
 /* -------------------------------------------------------------- listeners */
@@ -980,8 +994,6 @@ function wire() {
   $("#loginPass").addEventListener("keydown", (e) => {
     if (e.key === "Enter") attemptLogin();
   });
-
-  // Debounced so typing does not fire a request per keystroke.
   let searchTimer;
   $("#libSearch").addEventListener("input", (e) => {
     clearTimeout(searchTimer);
@@ -1024,9 +1036,6 @@ function wire() {
       savePref("theme.accent", btn.dataset.accent);
     })
   );
-  $("#splashToggle").addEventListener("change", (e) =>
-    savePref("splash.enabled", e.target.checked ? "true" : "false")
-  );
 
   $("#exportCsvBtn").addEventListener("click", () => download("/api/export/csv"));
   $("#exportJsonBtn").addEventListener("click", () => download("/api/export/json"));
@@ -1049,6 +1058,25 @@ function wire() {
     }
   });
 
+  $("#changeUsernameBtn").addEventListener("click", async () => {
+    const new_username = $("#pwUsername").value.trim();
+    const current_password = $("#pwCurrentForUsername").value;
+    if (!new_username) return toast("Enter a new username.", "error");
+    if (new_username.length < 2) return toast("Username must be at least 2 characters.", "error");
+    try {
+      await api("/api/auth/username", {
+        method: "POST",
+        body: JSON.stringify({ current_password, new_username }),
+      });
+      $("#pwUsername").value = $("#pwCurrentForUsername").value = "";
+      toast("Username changed.");
+      // Optionally reload to update the session
+      setTimeout(() => location.reload(), 500);
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  });
+
   $("#changePwBtn").addEventListener("click", async () => {
     const current_password = $("#pwCurrent").value;
     const new_password = $("#pwNew").value;
@@ -1067,7 +1095,6 @@ function wire() {
 
   $("#logoutBtn").addEventListener("click", async () => {
     await api("/api/auth/logout", { method: "POST" });
-    sessionStorage.removeItem("splashSeen");
     location.reload();
   });
 
