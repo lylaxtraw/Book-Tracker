@@ -180,6 +180,15 @@ a { color: var(--flame-bright); }
   text-shadow: 0 2px 12px rgba(138, 111, 232, 0.2);
 }
 
+.transition__subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 4vw, 1.1rem);
+  font-weight: 300;
+  margin: 8px 0 0;
+  color: rgba(224, 236, 240, 0.75);
+  letter-spacing: 0.008em;
+}
+
 .transition__dedication {
   font-family: var(--font-display);
   font-style: italic;

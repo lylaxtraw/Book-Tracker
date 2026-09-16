@@ -962,13 +962,12 @@ async function boot() {
   const session = await api("/api/auth/session");
   if (!session.authenticated) return showLogin();
 
-  $("#app").hidden = false;
-  
-  // Use defaults for branding
+  // Setup branding and preferences BEFORE showing transition
   state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
   state.prefs = {};
 
   $("#transitionBrand").textContent = state.branding.brand;
+  $("#transitionSubtitle").textContent = ""; // Change this to your desired text
   $("#transitionDedication").textContent = state.branding.dedication;
   $("#settingsBrand").textContent =
     `${state.branding.brand}${state.branding.dedication ? ` \u00B7 ${state.branding.dedication}` : ""}`;
@@ -979,8 +978,15 @@ async function boot() {
   $("#libSort").value = state.filters.sort;
   $("#libViewToggle").textContent = "Grid";
 
-  await refreshTags();
-  await loadBooks();
+  // Load data while transition plays
+  await Promise.all([
+    refreshTags(),
+    loadBooks()
+  ]);
+
+  // Show the beautiful transition, and only show app after it completes
+  await showTransition();
+  $("#app").hidden = false;
 }
 
 /* -------------------------------------------------------------- listeners */
