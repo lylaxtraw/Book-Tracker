@@ -118,7 +118,7 @@ a { color: var(--flame-bright); }
   filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
   opacity: 0;
   /* Swims up: starts at bottom of screen, ends at center-top */
-  animation: swimUp 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
+  animation: swimUp 3.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
 }
 
 @keyframes swimUp {
@@ -127,10 +127,10 @@ a { color: var(--flame-bright); }
     transform: translateY(350px) scale(0.7);
     filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0));
   }
-  20% {
+  15% {
     opacity: 0.7;
   }
-  50% {
+  45% {
     opacity: 0.9;
     transform: translateY(0) scale(1);
     filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
@@ -151,7 +151,7 @@ a { color: var(--flame-bright); }
   text-align: center;
   padding: 0 24px;
   opacity: 0;
-  animation: revealeContent 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
+  animation: revealeContent 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards;
 }
 
 @keyframes revealeContent {
@@ -194,7 +194,7 @@ a { color: var(--flame-bright); }
   background: linear-gradient(90deg, transparent, var(--flame), transparent);
   margin-top: 16px;
   opacity: 0;
-  animation: revealeContent 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s forwards;
+  animation: revealeContent 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.4s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
