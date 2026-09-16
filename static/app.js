@@ -201,21 +201,26 @@ const EMPTY_WAVE = `<svg class="empty__wave" viewBox="0 0 100 34" aria-hidden="t
 </svg>`;
 
 async function loadBooks() {
+  console.log("📚 loadBooks() starting...");
   const params = new URLSearchParams();
   if (state.filters.q) params.set("q", state.filters.q);
   params.set("sort", state.filters.sort);
   params.set("limit", "200");
   state.filters.tagIds.forEach((id) => params.append("tag_ids", id));
 
+  console.log("📚 loadBooks() fetching:", `/api/books?${params}`);
   try {
     const page = await api(`/api/books?${params}`);
+    console.log("📚 loadBooks() API response received:", page);
     state.books = page.items;
     state.total = page.total;
   } catch (err) {
+    console.error("📚 loadBooks() ERROR:", err);
     if (err.status !== 401) toast(err.message, "error");
     return;
   }
 
+  console.log("📚 loadBooks() rendering UI...");
   const container = $("#libBooks");
   container.className = `books books--${state.filters.view}`;
   $("#libCount").textContent = state.total
@@ -230,6 +235,7 @@ async function loadBooks() {
       <p>${filtering
         ? "Try loosening the filters."
         : "Head to Add and search for the first one."}</p></div>`;
+    console.log("📚 loadBooks() complete (empty state)");
     return;
   }
 
@@ -237,6 +243,7 @@ async function loadBooks() {
   $$(".book", container).forEach((node) =>
     node.addEventListener("click", () => openBook(Number(node.dataset.id)))
   );
+  console.log("📚 loadBooks() complete (books rendered)");
 }
 
 function renderFilters() {
@@ -940,9 +947,13 @@ function download(path) {
 /* ------------------------------------------------------------------- boot */
 
 async function refreshTags() {
+  console.log("📚 refreshTags() starting...");
   try {
+    console.log("📚 refreshTags() fetching /api/tags...");
     state.categories = await api("/api/tags");
+    console.log("📚 refreshTags() API response received:", state.categories);
   } catch (err) {
+    console.error("📚 refreshTags() ERROR:", err);
     // If /api/tags fails, create a default structure
     state.categories = [
       {
@@ -960,7 +971,14 @@ async function refreshTags() {
     ];
   }
   state.tags = state.categories.flatMap((c) => c.tags);
-  if (state.view === "library") renderFilters();
+  console.log("📚 refreshTags() flattened tags:", state.tags);
+  console.log("📚 refreshTags() current view:", state.view);
+  if (state.view === "library") {
+    console.log("📚 refreshTags() calling renderFilters()...");
+    renderFilters();
+    console.log("📚 refreshTags() renderFilters() complete");
+  }
+  console.log("📚 refreshTags() complete");
 }
 
 async function boot() {
