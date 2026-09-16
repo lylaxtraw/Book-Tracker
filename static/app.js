@@ -133,8 +133,7 @@ async function attemptLogin() {
     });
     $("#loginPass").value = "";
     $("#login").hidden = true;
-    // Show the shark transition animation before loading the app
-    await showTransition();
+    // Load app (which shows shark transition animation)
     await boot();
   } catch (err) {
     error.textContent = err.message;
