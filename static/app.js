@@ -967,8 +967,8 @@ async function boot() {
   state.prefs = {};
 
   $("#transitionBrand").textContent = state.branding.brand;
-  $("#transitionSubtitle").textContent = ""; // Change this to your desired text
-  $("#transitionDedication").textContent = state.branding.dedication;
+  $("#transitionSubtitle").textContent = "CherryStraw";
+  $("#transitionDedication").textContent = "With all my love, L.A.";
   $("#settingsBrand").textContent =
     `${state.branding.brand}${state.branding.dedication ? ` \u00B7 ${state.branding.dedication}` : ""}`;
 
