@@ -6,7 +6,7 @@
    eyes against near-black. That is exactly a dark interface: near-black paper,
    violet as the single accent that means "active", gold reserved for ratings
    and goals so it stays rare enough to feel like a highlight. The ocean only
-   appears on the splash and behind the empty states -- deep water, not a
+   appears on the transition and behind the empty states -- deep water, not a
    beach.
    ========================================================================= */
 
@@ -33,7 +33,7 @@
   --wax-2:       #bdb0cc;
   --wax-3:       #7d7091;
 
-  /* Deep water, for the splash and empty states. */
+  /* Deep water, for the transition and empty states. */
   --abyssal:     #061e2a;
   --current:     #0e4a5e;
   --shark:       #5d8496;
@@ -86,10 +86,10 @@ a { color: var(--flame-bright); }
 [hidden] { display: none !important; }
 
 /* =========================================================================
-   Splash
+   Transition: shark animation between login and app
    ========================================================================= */
 
-#splash {
+#transition {
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -99,21 +99,24 @@ a { color: var(--flame-bright); }
   transition: opacity 500ms ease, visibility 500ms;
 }
 
-#splash.is-leaving { opacity: 0; visibility: hidden; }
+#transition.is-leaving { opacity: 0; visibility: hidden; }
 
-.splash__scene {
+.transition__scene {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0;
   width: 100%;
+  height: 100vh;
   max-width: 300px;
+  margin: 0 auto;
 }
 
 /* Shark swims upward from bottom */
-.splash__shark {
-  width: clamp(120px, 30vw, 180px);
+.transition__shark {
+  width: clamp(140px, 35vw, 200px);
   height: auto;
   filter: drop-shadow(0 0 24px rgba(93, 132, 150, 0.6));
   opacity: 0;
@@ -143,7 +146,7 @@ a { color: var(--flame-bright); }
 }
 
 /* Text content: brand and dedication */
-.splash__content {
+.transition__content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -167,7 +170,7 @@ a { color: var(--flame-bright); }
   }
 }
 
-.splash__brand {
+.transition__brand {
   font-family: var(--font-display);
   font-size: clamp(2.2rem, 10vw, 3.2rem);
   font-weight: 400;
@@ -177,7 +180,7 @@ a { color: var(--flame-bright); }
   text-shadow: 0 2px 12px rgba(138, 111, 232, 0.2);
 }
 
-.splash__dedication {
+.transition__dedication {
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(0.85rem, 3vw, 0.95rem);
@@ -188,7 +191,7 @@ a { color: var(--flame-bright); }
 }
 
 /* Small violet accent line */
-.splash__accent {
+.transition__accent {
   width: 40px;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--flame), transparent);
@@ -198,14 +201,14 @@ a { color: var(--flame-bright); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash__shark,
-  .splash__content {
+  .transition__shark,
+  .transition__content {
     animation: none;
     opacity: 1;
     transform: none;
     filter: none;
   }
-  .splash__accent { opacity: 1; }
+  .transition__accent { opacity: 1; }
 }
 
 /* =========================================================================

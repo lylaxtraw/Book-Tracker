@@ -90,24 +90,18 @@ const state = {
 
 const tagById = (id) => state.tags.find((t) => t.id === id);
 
-/* ----------------------------------------------------------------- splash */
+/* ------------------------------------------------------------ transition */
 
-function runSplash() {
-  const splash = $("#splash");
-  // Always show splash unless explicitly disabled in preferences
-  const wanted = state.prefs["splash.enabled"] !== "false";
-
-  if (!wanted) {
-    splash.remove();
-    return Promise.resolve();
-  }
+function showTransition() {
+  const transition = $("#transition");
+  transition.hidden = false;
 
   return new Promise((resolve) => {
     // Wait for the beautiful shark animation + text to stay visible for 5 seconds,
     // then fade out and resolve
     setTimeout(() => {
-      splash.classList.add("is-leaving");
-      setTimeout(() => { splash.remove(); resolve(); }, 500);
+      transition.classList.add("is-leaving");
+      setTimeout(() => { transition.hidden = true; resolve(); }, 500);
     }, 5500);
   });
 }
@@ -117,7 +111,7 @@ function runSplash() {
 function showLogin() {
   $("#app").hidden = true;
   $("#login").hidden = false;
-  $("#splash")?.remove();
+  $("#transition").hidden = true;
 }
 
 async function attemptLogin() {
@@ -139,6 +133,8 @@ async function attemptLogin() {
     });
     $("#loginPass").value = "";
     $("#login").hidden = true;
+    // Show the shark transition animation before loading the app
+    await showTransition();
     await boot();
   } catch (err) {
     error.textContent = err.message;
@@ -972,13 +968,12 @@ async function boot() {
   state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
   state.prefs = {};
 
-  $("#splashBrand").textContent = state.branding.brand;
-  $("#splashDedication").textContent = state.branding.dedication;
+  $("#transitionBrand").textContent = state.branding.brand;
+  $("#transitionDedication").textContent = state.branding.dedication;
   $("#settingsBrand").textContent =
     `${state.branding.brand}${state.branding.dedication ? ` \u00B7 ${state.branding.dedication}` : ""}`;
 
   // Set default preferences
-  $("#splashToggle").checked = true;
   state.filters.view = "grid";
   state.filters.sort = "recent";
   $("#libSort").value = state.filters.sort;
@@ -986,7 +981,6 @@ async function boot() {
 
   await refreshTags();
   await loadBooks();
-  runSplash();
 }
 
 /* -------------------------------------------------------------- listeners */
@@ -1000,8 +994,6 @@ function wire() {
   $("#loginPass").addEventListener("keydown", (e) => {
     if (e.key === "Enter") attemptLogin();
   });
-
-  // Debounced so typing does not fire a request per keystroke.
   let searchTimer;
   $("#libSearch").addEventListener("input", (e) => {
     clearTimeout(searchTimer);
@@ -1043,9 +1035,6 @@ function wire() {
       applyAccent(btn.dataset.accent);
       savePref("theme.accent", btn.dataset.accent);
     })
-  );
-  $("#splashToggle").addEventListener("change", (e) =>
-    savePref("splash.enabled", e.target.checked ? "true" : "false")
   );
 
   $("#exportCsvBtn").addEventListener("click", () => download("/api/export/csv"));
