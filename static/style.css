@@ -95,82 +95,117 @@ a { color: var(--flame-bright); }
   z-index: 100;
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(180deg, #082430 0%, #061a26 45%, #040c16 100%);
-  transition: opacity 700ms ease, visibility 700ms;
+  background: linear-gradient(180deg, #061a26 0%, #040c16 50%, #0a0612 100%);
+  transition: opacity 500ms ease, visibility 500ms;
 }
 
 #splash.is-leaving { opacity: 0; visibility: hidden; }
 
-.splash__shark-container {
+.splash__scene {
   position: relative;
-  width: 120px;
-  height: 300px;
-  margin-bottom: 20px;
-  opacity: 0;
-  animation: rise 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) 300ms forwards;
-}
-
-/* Vertical lemon shark silhouette */
-.splash__shark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
   width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 16px rgba(160, 210, 230, 0.25));
+  max-width: 300px;
 }
 
-.splash__mark {
-  position: relative;
+/* Shark swims upward from bottom */
+.splash__shark {
+  width: 100px;
+  height: auto;
+  filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.5));
+  opacity: 0;
+  /* Swims up: starts at bottom of screen, ends at center-top */
+  animation: swimUp 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+}
+
+@keyframes swimUp {
+  0% {
+    opacity: 0;
+    transform: translateY(300px) scale(0.8);
+    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0));
+  }
+  20% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.5));
+  }
+  100% {
+    opacity: 0.85;
+    transform: translateY(-120px) scale(1);
+    filter: drop-shadow(0 0 20px rgba(93, 132, 150, 0.3));
+  }
+}
+
+/* Text content: brand and dedication */
+.splash__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
   text-align: center;
   padding: 0 24px;
+  opacity: 0;
+  animation: revealeContent 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s forwards;
+}
+
+@keyframes revealeContent {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 .splash__brand {
   font-family: var(--font-display);
-  font-size: clamp(2.3rem, 11vw, 3.6rem);
-  letter-spacing: 0.012em;
+  font-size: clamp(2.2rem, 10vw, 3.2rem);
+  font-weight: 400;
+  letter-spacing: 0.015em;
   margin: 0;
-  color: #f6efe4;
-  text-shadow: 0 0 34px rgba(160, 210, 230, 0.35);
-  opacity: 0;
-  animation: rise 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) 300ms forwards;
+  color: #f2ece1;
+  text-shadow: 0 2px 12px rgba(138, 111, 232, 0.2);
 }
 
 .splash__dedication {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(0.92rem, 3.6vw, 1.05rem);
-  margin: 12px 0 0;
-  color: rgba(224, 236, 240, 0.72);
+  font-size: clamp(0.85rem, 3vw, 0.95rem);
+  font-weight: 300;
+  margin: 8px 0 0;
+  color: rgba(224, 236, 240, 0.65);
+  letter-spacing: 0.01em;
+}
+
+/* Small violet accent line */
+.splash__accent {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--flame), transparent);
+  margin-top: 16px;
   opacity: 0;
-  animation: rise 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) 1150ms forwards;
-}
-
-/* A last violet pulse: the water gives way to the flame. */
-.splash__flame {
-  margin: 26px auto 0;
-  width: 3px;
-  height: 0;
-  border-radius: 3px;
-  background: linear-gradient(180deg, var(--flame-bright), var(--flame));
-  box-shadow: 0 0 22px var(--flame-glow);
-  animation: kindle 1100ms ease-out 2100ms forwards;
-}
-
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); filter: blur(5px); }
-  to   { opacity: 1; transform: none;             filter: none; }
-}
-
-@keyframes kindle {
-  from { height: 0;    opacity: 0; }
-  60%  { height: 30px; opacity: 1; }
-  to   { height: 22px; opacity: 0.85; }
+  animation: revealeContent 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.8s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash__shark { animation: none; }
-  .splash__brand, .splash__dedication { animation-duration: 1ms; opacity: 1; }
-  .splash__flame { animation: none; height: 22px; }
+  .splash__shark,
+  .splash__content {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .splash__accent { opacity: 1; }
 }
 
 /* =========================================================================

@@ -22,22 +22,22 @@
 <body>
 
 <!-- ===================================================================
-     Splash: deep water, a shark passing through, then the flame.
+     Splash: lemon shark swims up from the depths, carrying CherryStraw
      =================================================================== -->
 <div id="splash">
-<!-- Lemon shark silhouette vertical -->
-  <div class="splash__shark-container">
+  <div class="splash__scene">
+    <!-- Shark swims upward -->
     <svg class="splash__shark" viewBox="0 0 100 220" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-      <!-- Lemon shark body (vertical) -->
-      <path d="M50 20 C70 30, 80 50, 82 80 C85 110, 75 140, 65 160 L70 170 C72 175, 68 178, 63 176 L58 165 C58 180, 50 200, 50 220 C50 200, 42 180, 42 165 L37 176 C32 178, 28 175, 30 170 L35 160 C25 140, 15 110, 18 80 C20 50, 30 30, 50 20 Z" fill="#1a1a1a" opacity="0.9"/>
-      <!-- Dorsal fin -->
-      <path d="M50 60 L45 90 L55 90 Z" fill="#1a1a1a" opacity="0.9"/>
+      <path d="M50 20 C70 30, 80 50, 82 80 C85 110, 75 140, 65 160 L70 170 C72 175, 68 178, 63 176 L58 165 C58 180, 50 200, 50 220 C50 200, 42 180, 42 165 L37 176 C32 178, 28 175, 30 170 L35 160 C25 140, 15 110, 18 80 C20 50, 30 30, 50 20 Z" fill="#5d8496" opacity="0.85"/>
+      <path d="M50 60 L45 90 L55 90 Z" fill="#5d8496" opacity="0.85"/>
     </svg>
-  </div>
-  <div class="splash__mark">
-    <h1 class="splash__brand" id="splashBrand">CherryStraw</h1>
-    <p class="splash__dedication" id="splashDedication">With all my love, L.A.</p>
-    <div class="splash__flame"></div>
+    
+    <!-- Text reveals below shark as it rises -->
+    <div class="splash__content">
+      <h1 class="splash__brand" id="splashBrand">CherryStraw</h1>
+      <p class="splash__dedication" id="splashDedication">With all my love, L.A.</p>
+      <div class="splash__accent"></div>
+    </div>
   </div>
 </div>
 

@@ -104,11 +104,13 @@ function runSplash() {
   }
 
   return new Promise((resolve) => {
+    // Wait for the beautiful shark animation + text reveal to complete,
+    // then fade out and resolve
     setTimeout(() => {
       splash.classList.add("is-leaving");
       sessionStorage.setItem("splashSeen", "1");
-      setTimeout(() => { splash.remove(); resolve(); }, 720);
-    }, 3400);
+      setTimeout(() => { splash.remove(); resolve(); }, 520);
+    }, 5200);
   });
 }
 
