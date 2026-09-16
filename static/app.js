@@ -973,10 +973,13 @@ async function refreshTags() {
   state.tags = state.categories.flatMap((c) => c.tags);
   console.log("📚 refreshTags() flattened tags:", state.tags);
   console.log("📚 refreshTags() current view:", state.view);
-  if (state.view === "library") {
+  // Only render filters if app is visible (not during boot transition)
+  if (state.view === "library" && !$("#app").hidden) {
     console.log("📚 refreshTags() calling renderFilters()...");
     renderFilters();
     console.log("📚 refreshTags() renderFilters() complete");
+  } else {
+    console.log("📚 refreshTags() skipping renderFilters() (app hidden)");
   }
   console.log("📚 refreshTags() complete");
 }
@@ -1019,6 +1022,11 @@ async function boot() {
   console.log("📚 Transition complete, showing app...");
   $("#app").hidden = false;
   console.log("📚 App is now visible!");
+  
+  // Now render filters since app is visible
+  console.log("📚 Rendering filters now that app is visible...");
+  renderFilters();
+  console.log("📚 Filters rendered!");
 }
 
 /* -------------------------------------------------------------- listeners */
