@@ -94,20 +94,14 @@ const tagById = (id) => state.tags.find((t) => t.id === id);
 
 function showTransition() {
   const transition = $("#transition");
-  console.log("🦈 showTransition() called, showing transition...");
   transition.hidden = false;
 
   return new Promise((resolve) => {
     // Wait for the beautiful shark animation + text to stay visible for 5 seconds,
     // then fade out and resolve
     setTimeout(() => {
-      console.log("🦈 showTransition() 5.5s elapsed, adding is-leaving class...");
       transition.classList.add("is-leaving");
-      setTimeout(() => { 
-        console.log("🦈 showTransition() 0.5s fade completed, hiding transition and resolving");
-        transition.hidden = true; 
-        resolve(); 
-      }, 500);
+      setTimeout(() => { transition.hidden = true; resolve(); }, 500);
     }, 5500);
   });
 }
@@ -201,26 +195,21 @@ const EMPTY_WAVE = `<svg class="empty__wave" viewBox="0 0 100 34" aria-hidden="t
 </svg>`;
 
 async function loadBooks() {
-  console.log("📚 loadBooks() starting...");
   const params = new URLSearchParams();
   if (state.filters.q) params.set("q", state.filters.q);
   params.set("sort", state.filters.sort);
   params.set("limit", "200");
   state.filters.tagIds.forEach((id) => params.append("tag_ids", id));
 
-  console.log("📚 loadBooks() fetching:", `/api/books?${params}`);
   try {
     const page = await api(`/api/books?${params}`);
-    console.log("📚 loadBooks() API response received:", page);
     state.books = page.items;
     state.total = page.total;
   } catch (err) {
-    console.error("📚 loadBooks() ERROR:", err);
     if (err.status !== 401) toast(err.message, "error");
     return;
   }
 
-  console.log("📚 loadBooks() rendering UI...");
   const container = $("#libBooks");
   container.className = `books books--${state.filters.view}`;
   $("#libCount").textContent = state.total
@@ -235,7 +224,6 @@ async function loadBooks() {
       <p>${filtering
         ? "Try loosening the filters."
         : "Head to Add and search for the first one."}</p></div>`;
-    console.log("📚 loadBooks() complete (empty state)");
     return;
   }
 
@@ -243,14 +231,13 @@ async function loadBooks() {
   $$(".book", container).forEach((node) =>
     node.addEventListener("click", () => openBook(Number(node.dataset.id)))
   );
-  console.log("📚 loadBooks() complete (books rendered)");
 }
 
 function renderFilters() {
   const chips = state.categories
     .map((cat) => {
-      if (!cat.tags.length) return "";
-      const inner = cat.tags
+      if (!(cat.tags || []).length) return "";
+      const inner = (cat.tags || [])
         .map((t) => {
           const on = state.filters.tagIds.includes(t.id);
           return `<button class="chip ${on ? "is-on" : ""}" data-tag="${t.id}"
@@ -508,7 +495,7 @@ function renderResults(results) {
 
 /** Last step before a search hit becomes a book: pick its shelves. */
 function confirmCandidate(candidate) {
-  const wishlist = state.tags.find((t) => t.role === "wishlist");
+  const wishlist = state.tags.find((t) => t && t.role === "wishlist");
   const panel = openModal(`
     <h2 style="font-family:var(--font-display);margin:0 0 4px;font-size:1.2rem">
       ${esc(candidate.title)}</h2>
@@ -638,7 +625,7 @@ function renderTags() {
         </div>
         ${cat.description ? `<p class="category__desc">${esc(cat.description)}</p>` : ""}
         <div class="category__tags">
-          ${cat.tags.map((t) => `
+          ${(cat.tags || []).map((t) => `
             <button class="chip" data-edittag="${t.id}" style="--chip:${esc(t.color)}">
               <span class="chip__dot"></span>${esc(t.name)}
               <span class="chip__count">${t.book_count}</span></button>`).join("")
@@ -947,13 +934,9 @@ function download(path) {
 /* ------------------------------------------------------------------- boot */
 
 async function refreshTags() {
-  console.log("📚 refreshTags() starting...");
   try {
-    console.log("📚 refreshTags() fetching /api/tags...");
     state.categories = await api("/api/tags");
-    console.log("📚 refreshTags() API response received:", state.categories);
   } catch (err) {
-    console.error("📚 refreshTags() ERROR:", err);
     // If /api/tags fails, create a default structure
     state.categories = [
       {
@@ -970,28 +953,16 @@ async function refreshTags() {
       }
     ];
   }
-  state.tags = state.categories.flatMap((c) => c.tags);
-  console.log("📚 refreshTags() flattened tags:", state.tags);
-  console.log("📚 refreshTags() current view:", state.view);
+  state.tags = state.categories.flatMap((c) => c.tags || []);
   // Only render filters if app is visible (not during boot transition)
   if (state.view === "library" && !$("#app").hidden) {
-    console.log("📚 refreshTags() calling renderFilters()...");
     renderFilters();
-    console.log("📚 refreshTags() renderFilters() complete");
-  } else {
-    console.log("📚 refreshTags() skipping renderFilters() (app hidden)");
   }
-  console.log("📚 refreshTags() complete");
 }
 
 async function boot() {
-  console.log("📚 boot() starting...");
   const session = await api("/api/auth/session");
-  console.log("📚 Session check complete:", session);
-  if (!session.authenticated) {
-    console.log("📚 Not authenticated, showing login");
-    return showLogin();
-  }
+  if (!session.authenticated) return showLogin();
 
   // Setup branding and preferences BEFORE showing transition
   state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
@@ -1010,23 +981,17 @@ async function boot() {
   $("#libViewToggle").textContent = "Grid";
 
   // Load data while transition plays
-  console.log("📚 Loading data (tags + books)...");
   await Promise.all([
     refreshTags(),
     loadBooks()
   ]);
-  console.log("📚 Data loaded, now showing transition...");
 
   // Show the beautiful transition, and only show app after it completes
   await showTransition();
-  console.log("📚 Transition complete, showing app...");
   $("#app").hidden = false;
-  console.log("📚 App is now visible!");
   
   // Now render filters since app is visible
-  console.log("📚 Rendering filters now that app is visible...");
   renderFilters();
-  console.log("📚 Filters rendered!");
 }
 
 /* -------------------------------------------------------------- listeners */
