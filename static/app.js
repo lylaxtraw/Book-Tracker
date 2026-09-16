@@ -939,7 +939,25 @@ function download(path) {
 /* ------------------------------------------------------------------- boot */
 
 async function refreshTags() {
-  state.categories = await api("/api/categories");
+  try {
+    state.categories = await api("/api/tags");
+  } catch (err) {
+    // If /api/tags fails, create a default structure
+    state.categories = [
+      {
+        id: 1,
+        name: "Status",
+        exclusive: true,
+        tags: []
+      },
+      {
+        id: 2,
+        name: "Shelf",
+        exclusive: false,
+        tags: []
+      }
+    ];
+  }
   state.tags = state.categories.flatMap((c) => c.tags);
   if (state.view === "library") renderFilters();
 }
@@ -949,20 +967,22 @@ async function boot() {
   if (!session.authenticated) return showLogin();
 
   $("#app").hidden = false;
-  state.branding = await api("/api/branding");
-  state.prefs = await api("/api/preferences");
+  
+  // Use defaults for branding
+  state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
+  state.prefs = {};
 
   $("#splashBrand").textContent = state.branding.brand;
   $("#splashDedication").textContent = state.branding.dedication;
   $("#settingsBrand").textContent =
-    `${state.branding.brand} \u00B7 ${state.branding.dedication}`;
+    `${state.branding.brand}${state.branding.dedication ? ` \u00B7 ${state.branding.dedication}` : ""}`;
 
-  if (state.prefs["theme.accent"]) applyAccent(state.prefs["theme.accent"]);
-  $("#splashToggle").checked = state.prefs["splash.enabled"] !== "false";
-  state.filters.view = state.prefs["library.default_view"] || "grid";
-  state.filters.sort = state.prefs["library.default_sort"] || "recent";
+  // Set default preferences
+  $("#splashToggle").checked = true;
+  state.filters.view = "grid";
+  state.filters.sort = "recent";
   $("#libSort").value = state.filters.sort;
-  $("#libViewToggle").textContent = state.filters.view === "grid" ? "Grid" : "List";
+  $("#libViewToggle").textContent = "Grid";
 
   await refreshTags();
   await loadBooks();

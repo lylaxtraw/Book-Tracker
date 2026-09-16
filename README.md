@@ -1,153 +1,144 @@
 # Bookmark
 
-A personal book tracker: manage everything owned, wanted, read, and more.
-Python FastAPI backend with an installable progressive web app frontend.
+A personal book tracker for managing your reading life: track books you own, want to read, are reading, and have finished. Built with Python FastAPI backend and an installable progressive web app frontend.
 
-**Live App:** https://bookmark.example.com (replace with your deployment URL)
-
----
-
-## Local Development
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-cp .env.example .env        # then edit it -- at minimum SECRET_KEY and OWNER_PASSWORD
-uvicorn app.main:app --reload
-```
-
-Open http://localhost:8000 and sign in with `OWNER_USERNAME` / `OWNER_PASSWORD`
-from your `.env`.
-
-For local development set `SECURE_COOKIES=false`. A Secure-only cookie is never
-sent back over plain `http://`, so leaving it on means the login appears to
-succeed and then immediately forgets you.
-
-### Testing
-
-```bash
-pytest                 # run the full test suite
-pytest -v              # with verbose output
-pytest tests/test_books.py::test_progress_is_derived_from_pages
-```
-
-Tests never touch the network — Open Library is mocked with `respx` — and use a
-throwaway database in a temp directory, so they cannot disturb your real data.
+**[📱 Open Live App](#live-app)** | **[📚 Documentation](./docs/)** | **[🤝 Contributing](./docs/CONTRIBUTING.md)** | **[📄 License](./LICENSE)**
 
 ---
 
-## How the pieces fit
+## Features
 
-```
-app/
-  main.py          FastAPI app, static mounting, SPA fallback
-  config.py        settings from the environment
-  database.py      engine + session
-  models.py        Book, Tag, TagCategory, ReadingGoal, Preference, User
-  schemas.py       request/response validation
-  auth.py          argon2 hashing, signed session cookie
-  seed.py          the seven rainbow presets
-  openlibrary.py   search client + fuzzy match scoring
-  routers/         auth_routes, books, tags, search, stats, backup
-static/            index.html, style.css, app.js, manifest, service worker, icons
-tests/             pytest suite
-```
+✨ **Track Your Books**
+- Add books from Open Library or manually
+- Mark status (want to read, reading, finished, DNF)
+- Organize with tags and categories
+- See your reading statistics
 
-Interactive API docs run at `/api/docs` while the server is up.
+📱 **Progressive Web App**
+- Install on mobile devices without an app store
+- Works offline with service worker caching
+- Syncs across devices via the server
+- Fast, lightweight, and responsive
 
-### Tags
+🔐 **Simple & Secure**
+- Single-user design (perfect for personal use)
+- Session-based authentication
+- No signup required — just set a password
+- All your data stays under your control
 
-Seven presets, one per colour of the rainbow, split across two categories:
+📊 **Reading Insights**
+- Track pages read per year
+- Set and monitor yearly reading goals
+- See reading trends over time
 
-| Category | Exclusive | Tags |
+---
+
+## Live App
+
+**Currently Deploying:** https://bookmark.example.com
+
+To set up your own live instance:
+
+1. **Choose a hosting provider** (Fly.io recommended)
+   - See [Deployment Guide](./docs/DEPLOYMENT.md)
+   
+2. **Clone and deploy**
+   ```bash
+   git clone https://github.com/lylaxtraw/Book-Tracker.git
+   cd "Book Tracker"
+   flyctl launch --no-deploy
+   flyctl volumes create data --size 1
+   flyctl deploy
+   ```
+
+3. **Access your app**
+   - Visit your deployed URL
+   - Create your admin password
+   - Start tracking!
+
+For detailed setup instructions, see [Deployment Guide](./docs/DEPLOYMENT.md).
+
+---
+
+## Architecture
+
+The app consists of:
+
+- **Backend**: FastAPI (Python) with SQLAlchemy ORM
+- **Database**: SQLite (local) or PostgreSQL (production)
+- **Frontend**: Progressive Web App (vanilla JavaScript)
+- **Hosting**: Containerized with Docker
+
+For detailed architecture documentation, see [Architecture Guide](./docs/ARCHITECTURE.md).
+
+---
+
+## Tag System
+
+Seven preset tags organized by type and color:
+
+| Category | Behavior | Tags |
 |---|---|---|
-| Status | yes — one per book | Did Not Finish (red), Reading (orange), Want to Read (yellow), Read (blue) |
-| Shelf | no | Owned (green), Lent Out (indigo), Favourite (violet) |
+| **Status** | One per book | Did Not Finish (red), Reading (orange), Want to Read (yellow), Read (blue) |
+| **Shelf** | Multiple per book | Owned (green), Lent Out (indigo), Favourite (violet) |
 
-Status is exclusive so a book sorts onto exactly one shelf. Shelf is not,
-because a book can be owned, lent out and beloved at the same time. Genre and
-Mood arrive empty, waiting for whatever the reader wants to put there.
-
-Every one of these is an ordinary database row. Rename them, recolour them,
-move them between categories, delete them, add new categories with their own
-exclusivity rule — all from the Tags screen, presets included.
-
-Behaviour keys on a hidden `role` field rather than the tag's name, so renaming
-"Read" to "Leído" doesn't break the statistics or the automatic finish dates.
-
-### Adding books
-
-One flow, two doors. A quick search box, and an Advanced Search panel that
-folds down to expose title, author, subject, publisher, ISBN, language and a
-year range — filled fields are ANDed together. Results come back scored against
-what was typed, with the closest one marked and a confidence percentage, to
-confirm or reject. If Open Library is down or has never heard of the book,
-there's a manual form, and the app says so rather than showing an error.
-
-Open Library needs no API key and no registration, which is what keeps the
-whole "ship a book database" problem down to one HTTP request.
+All tags are editable — rename them, change colors, add new categories, or delete presets. The system tracks tag *roles* internally, so renaming "Read" to "Leído" won't break your statistics.
 
 ---
 
-## Deployment as a PWA
+## Search & Add Books
 
-The app is a progressive web app, installable on mobile devices without an app store.
+Search for books from **Open Library** (requires no API key or login):
 
-**Installation on iOS:**
-1. Deploy to a server with HTTPS.
-2. Open the URL in Safari (not Chrome; only Safari can install PWAs on iOS).
-3. Tap Share → Add to Home Screen.
-
-**Key features:**
-- The service worker caches the shell, so the app opens instantly.
-- Library data syncs across devices via the server.
-- No app store review process, no $99/year developer account.
-
-### Hosting
-
-Consider these factors when choosing a host:
-
-- **Persistent disk:** SQLite requires a persistent disk. Most free tiers don't include one.
-- **Always-on:** Free tiers may spin down during idle periods.
-- **Alternative:** Use a hosted Postgres database instead of SQLite. No code changes needed — add
-  `psycopg[binary]` to `requirements.txt` and point `DATABASE_URL` at your Postgres instance.
-
-Popular options:
-- **Fly.io** — `fly launch --no-deploy`, then `fly volumes create bookmark_data --size 1`.
-- **Render** — Free tier lacks persistent disk; consider paid disk or Postgres.
-- **Railway** — Runs on monthly credit.
-
-Environment variables for deployment:
-
-```
-SECRET_KEY=<python -c "import secrets; print(secrets.token_urlsafe(48))">
-OWNER_USERNAME=<username>
-OWNER_PASSWORD=<strong password>
-SECURE_COOKIES=true
-```
-
-The password is hashed with argon2 on first boot and never stored in plaintext. Users can change it
-from Settings after login.
+1. **Quick Search**: Type title, author, or ISBN
+2. **Advanced Search**: Filter by title, author, subject, publisher, year
+3. **Results**: Scored by relevance — the best match is highlighted
+4. **Add Manually**: If Open Library doesn't have the book, fill in the details yourself
 
 ---
 
-## GitHub
+## API Documentation
 
-```bash
-git init
-git add .
-git commit -m "Bookmark: first shelf"
-git branch -M main
-git remote add origin git@github.com:<you>/bookmark.git
-git push -u origin main
-```
+For developers integrating with Book Tracker:
 
-`.gitignore` already excludes `.env`, `.venv/` and every `*.db` file. Nobody's
-library or password ends up in the repo.
+- **Interactive Docs**: Available at `/api/docs` when running locally
+- **Full Reference**: See [API Documentation](./docs/API.md)
+- **Example Endpoints**:
+  - `GET /api/books/` — List your books
+  - `POST /api/books/` — Add a book
+  - `GET /api/stats/` — Get reading statistics
 
 ---
+
+## Documentation
+
+- **[Getting Started](./docs/DEPLOYMENT.md)** — Deploy to Fly.io or Render
+- **[Architecture](./docs/ARCHITECTURE.md)** — How the app is structured
+- **[API Docs](./docs/API.md)** — Complete endpoint reference
+- **[Contributing](./docs/CONTRIBUTING.md)** — Report bugs, request features, contribute code
+
+For developers setting up a local environment, see [Developer Setup](./.dev/SETUP.md).
+
+---
+
+## License
+
+MIT License — see [LICENSE](./LICENSE) for details.
+
+You're free to use, modify, and deploy Book Tracker for personal or commercial use, as long as you provide attribution.
+
+---
+
+## Getting Help
+
+- 📖 Check the [Documentation](./docs/)
+- 🐛 Found a bug? [Report it](https://github.com/lylaxtraw/Book-Tracker/issues)
+- 💡 Have an idea? [Request a feature](https://github.com/lylaxtraw/Book-Tracker/issues)
+- 🤝 Want to contribute? See [Contributing Guide](./docs/CONTRIBUTING.md)
+
+---
+
+Made with ❤️ for book lovers everywhere.
 
 ## Notes for later
 

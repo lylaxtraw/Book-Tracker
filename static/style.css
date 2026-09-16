@@ -102,58 +102,20 @@ a { color: var(--flame-bright); }
 
 #splash.is-leaving { opacity: 0; visibility: hidden; }
 
-.splash__water {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-/* Two slow, offset light bands read as caustics without any images. */
-.splash__caustic {
-  position: absolute;
-  inset: -30%;
-  background:
-    repeating-linear-gradient(
-      104deg,
-      transparent 0 44px,
-      rgba(150, 220, 240, 0.055) 44px 66px,
-      transparent 66px 118px
-    );
-  animation: drift 19s linear infinite;
-}
-.splash__caustic--slow {
-  background:
-    repeating-linear-gradient(
-      72deg,
-      transparent 0 70px,
-      rgba(120, 200, 230, 0.04) 70px 96px,
-      transparent 96px 180px
-    );
-  animation: drift 31s linear infinite reverse;
-}
-
-@keyframes drift {
-  from { transform: translate3d(-8%, -4%, 0); }
-  to   { transform: translate3d(8%, 4%, 0); }
-}
-
-/* The shark. One silhouette, crossing once, low in the frame. */
-.splash__shark {
-  position: absolute;
-  bottom: 17%;
-  left: -32%;
-  width: 190px;
+.splash__shark-container {
+  position: relative;
+  width: 120px;
+  height: 300px;
+  margin-bottom: 20px;
   opacity: 0;
-  fill: var(--shark);
-  animation: swim 6.2s cubic-bezier(0.33, 0, 0.5, 1) 0.5s forwards;
+  animation: rise 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) 300ms forwards;
 }
 
-@keyframes swim {
-  0%   { transform: translateX(0)     translateY(0)    scale(0.86); opacity: 0; }
-  14%  { opacity: 0.34; }
-  50%  { transform: translateX(78vw)  translateY(-14px) scale(1);    opacity: 0.30; }
-  86%  { opacity: 0.16; }
-  100% { transform: translateX(150vw) translateY(6px)  scale(0.92); opacity: 0; }
+/* Vertical lemon shark silhouette */
+.splash__shark {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 16px rgba(160, 210, 230, 0.25));
 }
 
 .splash__mark {
@@ -206,7 +168,7 @@ a { color: var(--flame-bright); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash__caustic, .splash__shark { animation: none; }
+  .splash__shark { animation: none; }
   .splash__brand, .splash__dedication { animation-duration: 1ms; opacity: 1; }
   .splash__flame { animation: none; height: 22px; }
 }
