@@ -1,0 +1,55 @@
+name: Question / Discussion
+description: Ask a question or start a discussion
+labels: ["question"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help!
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: |
+        I'm trying to [action] but I'm not sure how to [specific task].
+        Could you help me understand [concept]?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context or background
+      placeholder: |
+        What I've tried so far:
+        - [attempt 1]
+        - [attempt 2]
+        
+        Environment:
+        - OS: [macOS/Windows/Linux]
+        - Python: 3.13
+        - Browser: [if applicable]
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to docs, code, or related issues
+      placeholder: |
+        - Docs: [link]
+        - Related issue: #123
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I've checked the documentation
+          required: false
+        - label: I've searched existing issues/discussions
+          required: false

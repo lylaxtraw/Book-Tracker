@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Library</title>
+
+<meta name="theme-color" content="#0B0A12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Library">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<!-- ─────────────────────────────── splash ─────────────────────────────── -->
+<div id="splash" aria-hidden="true">
+  <svg class="shark" viewBox="0 0 200 84" aria-hidden="true">
+    <path d="M198 44 C176 32 148 26 120 28 L106 6 L98 29 C72 32 46 38 28 45 L4 22 L13 46 L4 70 L28 49 C40 54 56 58 74 60 L84 78 L100 61 C134 61 176 56 198 44 Z"/>
+  </svg>
+  <div class="splash-mark">
+    <p class="studio" id="splash-studio">CherryStraw</p>
+    <p class="dedication" id="splash-dedication">With all my love, L.A.</p>
+  </div>
+</div>
+
+<!-- ──────────────────────────────── lock ──────────────────────────────── -->
+<div id="lock" hidden>
+  <div class="lock-card">
+    <span class="flame" aria-hidden="true"></span>
+    <h1>Your library is waiting</h1>
+    <p class="muted">Enter the password to open it.</p>
+    <input id="lock-password" type="password" autocomplete="current-password"
+           placeholder="Password" enterkeyhint="go">
+    <p class="field-error" id="lock-error" role="alert" hidden></p>
+    <button class="btn-primary" id="lock-submit">Open library</button>
+  </div>
+</div>
+
+<!-- ───────────────────────────────── app ──────────────────────────────── -->
+<div id="app" hidden>
+
+  <!-- LIBRARY -->
+  <section class="view" id="view-library">
+    <header class="view-head">
+      <h1 class="serif" id="library-heading">Library</h1>
+      <input id="filter-text" class="search-field" type="search"
+             placeholder="Find a book you already have" enterkeyhint="search">
+      <div class="tagbar" id="filter-tags"></div>
+      <div class="sortbar">
+        <label for="sort-select" class="muted">Sorted by</label>
+        <select id="sort-select">
+          <option value="added">recently added</option>
+          <option value="title">title</option>
+          <option value="author">author</option>
+          <option value="rating">rating</option>
+          <option value="finished">date finished</option>
+          <option value="year">year published</option>
+        </select>
+      </div>
+    </header>
+    <div class="shelf" id="shelf"></div>
+    <div class="empty" id="library-empty" hidden>
+      <p class="serif">Nothing on the shelf yet.</p>
+      <button class="btn-primary" data-goto="add">Find your first book</button>
+    </div>
+  </section>
+
+  <!-- ADD -->
+  <section class="view" id="view-add" hidden>
+    <header class="view-head">
+      <h1 class="serif">Add a book</h1>
+      <input id="search-q" class="search-field" type="search"
+             placeholder="Title, author, anything" enterkeyhint="search">
+      <button class="linkish" id="toggle-advanced" aria-expanded="false"
+              aria-controls="advanced">Advanced search</button>
+
+      <div id="advanced" hidden>
+        <div class="grid-2">
+          <label>Title<input id="adv-title" type="text"></label>
+          <label>Author<input id="adv-author" type="text"></label>
+          <label>ISBN<input id="adv-isbn" type="text" inputmode="numeric"></label>
+          <label>Subject<input id="adv-subject" type="text"></label>
+          <label>Publisher<input id="adv-publisher" type="text"></label>
+          <label>First published<input id="adv-year" type="number" inputmode="numeric"></label>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="search-run">Search the catalogue</button>
+      <button class="linkish" id="manual-open">Type it in by hand instead</button>
+    </header>
+
+    <div class="results" id="results"></div>
+    <p class="hint" id="search-hint">Searches Open Library — millions of titles, free and open.</p>
+  </section>
+
+  <!-- STATS -->
+  <section class="view" id="view-stats" hidden>
+    <header class="view-head"><h1 class="serif">Reading</h1></header>
+    <div id="stats-body"></div>
+  </section>
+
+  <!-- TAGS -->
+  <section class="view" id="view-tags" hidden>
+    <header class="view-head">
+      <h1 class="serif">Tags</h1>
+      <p class="muted">Make as many as you like. Colours, names, groups — all yours.</p>
+    </header>
+    <div id="tags-body"></div>
+
+    <div class="block">
+      <h2>New group</h2>
+      <p class="muted">Groups keep tags tidy. Mark one “only one at a time” and
+        picking a new tag from it clears the old one.</p>
+      <input id="new-category-name" type="text" placeholder="Group name, e.g. Mood">
+      <label class="check"><input id="new-category-exclusive" type="checkbox">
+        Only one tag at a time</label>
+      <button class="btn-quiet" id="new-category-save">Add group</button>
+    </div>
+
+    <div class="block">
+      <h2>Your library file</h2>
+      <p class="muted">Take it with you, or bring a shelf in from somewhere else.</p>
+      <div class="row-wrap">
+        <a class="btn-quiet" href="/api/export.csv">Export CSV</a>
+        <a class="btn-quiet" href="/api/backup.json">Download backup</a>
+        <label class="btn-quiet file-btn">Import CSV
+          <input id="import-file" type="file" accept=".csv,text/csv" hidden></label>
+      </div>
+      <button class="linkish danger" id="sign-out">Sign out</button>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <nav id="tabbar">
+    <button data-goto="library" class="tab is-on">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h5v14H4zM11 5h4v14h-4zM17.2 5.6l3.3 12.8-3.4.9L13.8 6.5z"/></svg>
+      Library</button>
+    <button data-goto="add" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>
+      Add</button>
+    <button data-goto="stats" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h3v-7H4zM10.5 19h3V5h-3zM17 19h3v-11h-3z"/></svg>
+      Reading</button>
+    <button data-goto="tags" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5V4h7.5l9.5 9.5-7.5 7.5zM7 8.6a1.4 1.4 0 1 0 0-2.8 1.4 1.4 0 0 0 0 2.8z"/></svg>
+      Tags</button>
+  </nav>
+</div>
+
+<!-- book detail / editor -->
+<div id="sheet" hidden>
+  <div class="sheet-backdrop" data-close-sheet></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true" aria-label="Book">
+    <div class="sheet-grip" data-close-sheet></div>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

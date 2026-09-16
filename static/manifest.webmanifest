@@ -1,0 +1,17 @@
+{
+  "name": "Bookmark",
+  "short_name": "Bookmark",
+  "description": "A quiet place to keep every book you own, want and have read.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#061a26",
+  "theme_color": "#0a0612",
+  "categories": ["books", "productivity", "lifestyle"],
+  "icons": [
+    { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

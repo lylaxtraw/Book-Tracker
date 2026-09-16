@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- viewport-fit=cover lets the app paint under the notch and home indicator -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0a0612">
+<meta name="description" content="A quiet place to keep every book you own, want and have read.">
+
+<!-- Tells iOS to run this fullscreen once it is on the home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bookmark">
+<link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+
+<title>Bookmark</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- ===================================================================
+     Splash: deep water, a shark passing through, then the flame.
+     =================================================================== -->
+<div id="splash">
+  <div class="splash__water">
+    <div class="splash__caustic"></div>
+    <div class="splash__caustic splash__caustic--slow"></div>
+    <svg class="splash__shark" viewBox="0 0 220 84" aria-hidden="true">
+      <path d="M8 56c22-4 38-12 52-22 16-11 34-19 56-21 6-9 12-13 16-13 3 0
+               4 6 3 14 14 3 26 10 36 20 12 1 22 5 33 13-9 3-18 5-29 5-9
+               9-21 15-36 18 2 8 1 13-2 13-4 0-9-4-15-12-18 1-36-1-53-7-13
+               8-28 12-46 13 6-6 9-13 9-21-9-1-17 0-24 0z"/>
+    </svg>
+  </div>
+  <div class="splash__mark">
+    <h1 class="splash__brand" id="splashBrand">CherryStraw</h1>
+    <p class="splash__dedication" id="splashDedication">With all my love, L.A.</p>
+    <div class="splash__flame"></div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     Login
+     =================================================================== -->
+<div id="login" hidden>
+  <div class="login__card">
+    <h2 class="login__title">Bookmark</h2>
+    <p class="login__sub">Sign in to reach your shelves.</p>
+    <label class="field">
+      <span>Name</span>
+      <input type="text" id="loginUser" autocomplete="username"
+             autocapitalize="none" autocorrect="off" spellcheck="false">
+    </label>
+    <label class="field">
+      <span>Password</span>
+      <input type="password" id="loginPass" autocomplete="current-password">
+    </label>
+    <button class="btn btn--primary btn--block" id="loginBtn">Open the library</button>
+    <p class="muted" id="loginError" style="margin-top:12px;color:var(--danger)" hidden></p>
+  </div>
+</div>
+
+<!-- ===================================================================
+     App
+     =================================================================== -->
+<div id="app" hidden>
+
+  <header class="topbar">
+    <h1 class="topbar__title" id="viewTitle">Library</h1>
+    <button class="btn btn--sm btn--ghost" id="headerAction" hidden></button>
+  </header>
+
+  <!-- ---------- Library ---------- -->
+  <section class="view" id="view-library">
+    <label class="field">
+      <input type="search" id="libSearch" placeholder="Search your shelves"
+             autocapitalize="none" autocorrect="off">
+    </label>
+
+    <div class="row row--tight" style="margin-bottom:12px">
+      <select id="libSort" class="grow" style="max-width:170px">
+        <option value="recent">Recently added</option>
+        <option value="title">Title A-Z</option>
+        <option value="author">Author A-Z</option>
+        <option value="rating">Highest rated</option>
+        <option value="finished">Recently finished</option>
+        <option value="year">Newest published</option>
+        <option value="pages">Longest</option>
+      </select>
+      <button class="btn btn--sm" id="libViewToggle" title="Switch layout">Grid</button>
+      <span class="muted grow" id="libCount" style="text-align:right"></span>
+    </div>
+
+    <div id="libFilters" style="margin-bottom:14px"></div>
+    <div id="libBooks" class="books"></div>
+  </section>
+
+  <!-- ---------- Add ---------- -->
+  <section class="view" id="view-add" hidden>
+    <label class="field">
+      <span>Search Open Library</span>
+      <input type="search" id="addQuery" placeholder="Title, author, ISBN..."
+             enterkeyhint="search">
+    </label>
+
+    <details class="advanced">
+      <summary>Advanced search</summary>
+      <div class="advanced__body">
+        <div class="grid-2">
+          <label class="field"><span>Title</span><input type="text" id="advTitle"></label>
+          <label class="field"><span>Author</span><input type="text" id="advAuthor"></label>
+          <label class="field"><span>Subject</span><input type="text" id="advSubject"></label>
+          <label class="field"><span>Publisher</span><input type="text" id="advPublisher"></label>
+          <label class="field"><span>ISBN</span><input type="text" id="advIsbn"></label>
+          <label class="field"><span>Language</span>
+            <select id="advLanguage">
+              <option value="">Any</option>
+              <option value="eng">English</option>
+              <option value="spa">Spanish</option>
+              <option value="fre">French</option>
+              <option value="ger">German</option>
+              <option value="por">Portuguese</option>
+              <option value="ita">Italian</option>
+              <option value="jpn">Japanese</option>
+            </select>
+          </label>
+          <label class="field"><span>Published after</span><input type="number" id="advYearFrom" inputmode="numeric"></label>
+          <label class="field"><span>Published before</span><input type="number" id="advYearTo" inputmode="numeric"></label>
+        </div>
+        <button class="btn btn--primary btn--block" id="advSearchBtn">Search these fields</button>
+      </div>
+    </details>
+
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn btn--primary grow" id="addSearchBtn">Search</button>
+      <button class="btn grow" id="addManualBtn">Add by hand</button>
+    </div>
+
+    <div id="addResults"></div>
+  </section>
+
+  <!-- ---------- Tags ---------- -->
+  <section class="view" id="view-tags" hidden>
+    <p class="muted" style="margin-top:0">
+      Every tag here is yours to rename, recolour, move or delete &mdash; presets
+      included. Categories marked <em>one only</em> let a book hold a single tag
+      from that group, which is what sorts it onto one shelf.
+    </p>
+    <div class="row" style="margin:14px 0">
+      <button class="btn btn--primary grow" id="newTagBtn">New tag</button>
+      <button class="btn grow" id="newCategoryBtn">New category</button>
+    </div>
+    <div id="tagList"></div>
+  </section>
+
+  <!-- ---------- Stats ---------- -->
+  <section class="view" id="view-stats" hidden>
+    <div id="statsBody"></div>
+  </section>
+
+  <!-- ---------- Settings ---------- -->
+  <section class="view" id="view-settings" hidden>
+    <h3 class="section-title">Appearance</h3>
+    <div class="row" style="margin-bottom:8px">
+      <label class="field grow" style="margin:0">
+        <span>Flame colour</span>
+        <div class="row row--tight">
+          <input type="color" id="accentPicker" value="#8a6fe8">
+          <button class="btn btn--sm" data-accent="#8a6fe8">Chandelure</button>
+          <button class="btn btn--sm" data-accent="#0e4a5e">Abyss</button>
+          <button class="btn btn--sm" data-accent="#b96bff">Litwick</button>
+        </div>
+      </label>
+    </div>
+    <label class="row" style="gap:9px;margin:14px 0">
+      <input type="checkbox" id="splashToggle" style="width:auto">
+      <span>Show the opening screen each time</span>
+    </label>
+
+    <h3 class="section-title">Your library</h3>
+    <div class="row">
+      <button class="btn grow" id="exportCsvBtn">Export CSV</button>
+      <button class="btn grow" id="exportJsonBtn">Backup JSON</button>
+    </div>
+    <label class="field" style="margin-top:12px">
+      <span>Import a CSV</span>
+      <input type="file" id="importFile" accept=".csv,text/csv">
+    </label>
+    <p class="muted">
+      Columns from Goodreads exports are recognised automatically. Books already
+      on your shelves are skipped rather than duplicated.
+    </p>
+
+    <h3 class="section-title">Account</h3>
+    <div class="grid-2">
+      <label class="field"><span>Current password</span><input type="password" id="pwCurrent" autocomplete="current-password"></label>
+      <label class="field"><span>New password</span><input type="password" id="pwNew" autocomplete="new-password"></label>
+    </div>
+    <div class="row">
+      <button class="btn grow" id="changePwBtn">Change password</button>
+      <button class="btn btn--danger grow" id="logoutBtn">Sign out</button>
+    </div>
+
+    <p class="muted" style="margin-top:30px;text-align:center" id="settingsBrand"></p>
+  </section>
+
+  <!-- ---------- Tab bar ---------- -->
+  <nav class="tabbar">
+    <button class="tab is-on" data-view="library">
+      <svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 015.5 4H9v16H5.5A1.5 1.5 0 014 18.5zM10 4h3.5A1.5 1.5 0 0115 5.5v13a1.5 1.5 0 01-1.5 1.5H10z"/><path d="M16.4 5.6l2.6.7a1.5 1.5 0 011 1.9l-3.2 11.4"/></svg>
+      Library
+    </button>
+    <button class="tab" data-view="add">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg>
+      Add
+    </button>
+    <button class="tab" data-view="tags">
+      <svg viewBox="0 0 24 24"><path d="M4 11V5.5A1.5 1.5 0 015.5 4H11l8.2 8.2a1.6 1.6 0 010 2.3l-4.7 4.7a1.6 1.6 0 01-2.3 0z"/><circle cx="8" cy="8" r="1.3"/></svg>
+      Tags
+    </button>
+    <button class="tab" data-view="stats">
+      <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      Stats
+    </button>
+    <button class="tab" data-view="settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.8M12 18.7v2.8M21.5 12h-2.8M5.3 12H2.5M18.7 5.3l-2 2M7.3 16.7l-2 2M18.7 18.7l-2-2M7.3 7.3l-2-2"/></svg>
+      Settings
+    </button>
+  </nav>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="/static/js/app.js" type="module"></script>
+</body>
+</html>

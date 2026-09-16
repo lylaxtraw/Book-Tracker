@@ -1,0 +1,29 @@
+# Render blueprint.
+#
+# Heads up: free Render web services do not include a persistent disk, and they
+# spin down when idle. Without a disk the SQLite file is wiped on every restart.
+# Two ways round it:
+#   1. Add a paid disk (cheapest fix, keeps SQLite).
+#   2. Point DATABASE_URL at a free hosted Postgres and add `psycopg[binary]`
+#      to requirements.txt. Nothing else in the code has to change.
+services:
+  - type: web
+    name: bookmark
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OWNER_USERNAME
+        sync: false
+      - key: OWNER_PASSWORD
+        sync: false
+      - key: SECURE_COOKIES
+        value: "true"
+      - key: DATABASE_URL
+        value: sqlite:////data/booktracker.db
+    disk:
+      name: bookmark-data
+      mountPath: /data
+      sizeGB: 1
