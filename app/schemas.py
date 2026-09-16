@@ -35,6 +35,11 @@ class PasswordChangeRequest(BaseModel):
     new_password: str = Field(min_length=8, max_length=200)
 
 
+class UsernameChangeRequest(BaseModel):
+    current_password: str
+    new_username: str = Field(min_length=2, max_length=50)
+
+
 class SessionInfo(BaseModel):
     authenticated: bool
     username: str | None = None

@@ -14,7 +14,7 @@ from ..auth import (
 )
 from ..database import get_db
 from ..models import User
-from ..schemas import LoginRequest, PasswordChangeRequest, SessionInfo
+from ..schemas import LoginRequest, PasswordChangeRequest, UsernameChangeRequest, SessionInfo
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -62,4 +62,26 @@ def change_password(
             detail="Current password is not right.",
         )
     user.password_hash = hash_password(payload.new_password)
+    db.commit()
+
+
+@router.post("/username", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
+def change_username(
+    payload: UsernameChangeRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user),
+) -> None:
+    if not verify_password(payload.current_password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is not right.",
+        )
+    # Check if username already exists
+    existing = db.query(User).filter(User.username == payload.new_username).first()
+    if existing and existing.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That username is already taken.",
+        )
+    user.username = payload.new_username
     db.commit()

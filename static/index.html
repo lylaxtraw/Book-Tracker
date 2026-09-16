@@ -194,6 +194,14 @@
     </p>
 
     <h3 class="section-title">Account</h3>
+    <label class="field"><span>Change username</span>
+      <input type="text" id="pwUsername" placeholder="New username" autocapitalize="none" autocorrect="off">
+    </label>
+    <div class="grid-2">
+      <label class="field"><span>Current password</span><input type="password" id="pwCurrentForUsername" autocomplete="current-password"></label>
+    </div>
+    <button class="btn grow" id="changeUsernameBtn" style="margin-bottom:14px">Change username</button>
+
     <div class="grid-2">
       <label class="field"><span>Current password</span><input type="password" id="pwCurrent" autocomplete="current-password"></label>
       <label class="field"><span>New password</span><input type="password" id="pwNew" autocomplete="new-password"></label>

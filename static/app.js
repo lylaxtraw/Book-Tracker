@@ -1071,6 +1071,25 @@ function wire() {
     }
   });
 
+  $("#changeUsernameBtn").addEventListener("click", async () => {
+    const new_username = $("#pwUsername").value.trim();
+    const current_password = $("#pwCurrentForUsername").value;
+    if (!new_username) return toast("Enter a new username.", "error");
+    if (new_username.length < 2) return toast("Username must be at least 2 characters.", "error");
+    try {
+      await api("/api/auth/username", {
+        method: "POST",
+        body: JSON.stringify({ current_password, new_username }),
+      });
+      $("#pwUsername").value = $("#pwCurrentForUsername").value = "";
+      toast("Username changed.");
+      // Optionally reload to update the session
+      setTimeout(() => location.reload(), 500);
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  });
+
   $("#changePwBtn").addEventListener("click", async () => {
     const current_password = $("#pwCurrent").value;
     const new_password = $("#pwNew").value;
