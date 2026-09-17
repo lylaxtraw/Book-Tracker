@@ -5,6 +5,7 @@ from __future__ import annotations
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .database import get_db
@@ -35,8 +36,9 @@ def needs_rehash(hashed: str) -> bool:
 
 
 def authenticate(db: Session, username: str, password: str) -> User | None:
+    # Case-insensitive username search (SQLite is case-sensitive by default)
     user = (
-        db.query(User).filter(User.username == username.strip().lower()).one_or_none()
+        db.query(User).filter(func.lower(User.username) == username.strip().lower()).one_or_none()
     )
     if user is None:
         # Hash anyway so a missing user and a wrong password take similar time.
