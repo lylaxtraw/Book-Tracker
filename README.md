@@ -1,4 +1,4 @@
-# Bookmark
+# Boocker
 
 A personal book tracker for managing your reading life: track books you own, want to read, are reading, and have finished. Built with Python FastAPI backend and an installable progressive web app frontend.
 
