@@ -7,7 +7,7 @@ Bookmark is a **Progressive Web App (PWA)**, which means it works like a native 
 ### iOS (iPhone or iPad)
 
 1. Open **Safari** (not Chrome)
-2. Navigate to your Bookmark instance (e.g., `https://boocker.fly.dev`)
+2. Navigate to your Boocker instance (e.g., `https://boocker.fly.dev`)
 3. Tap the **Share button** at the bottom (looks like a square with an arrow)
 4. Scroll down and tap **"Add to Home Screen"**
 5. Choose a name (default is fine)
