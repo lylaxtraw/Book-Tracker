@@ -353,9 +353,9 @@ input[type="color"] {
 .btn:disabled { opacity: 0.45; cursor: default; }
 
 .btn--primary {
-  background: linear-gradient(170deg, var(--flame), var(--flame-dim));
+  background: linear-gradient(170deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000));
   border-color: transparent;
-  box-shadow: 0 5px 20px var(--flame-glow);
+  box-shadow: 0 5px 20px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .btn--ghost { background: transparent; }
@@ -372,7 +372,7 @@ input[type="color"] {
    ========================================================================= */
 
 .chip {
-  --chip: var(--flame);
+  --chip: var(--accent);
   display: inline-flex;
   align-items: center;
   gap: 6px;

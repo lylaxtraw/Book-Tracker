@@ -13,8 +13,9 @@ from ..auth import (
     verify_password,
 )
 from ..database import get_db
-from ..models import User
+from ..models import User, Book, Tag, TagCategory, Preference, ReadingGoal
 from ..schemas import LoginRequest, PasswordChangeRequest, UsernameChangeRequest, SessionInfo
+from ..seed import seed_all
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -85,3 +86,25 @@ def change_username(
         )
     user.username = payload.new_username
     db.commit()
+
+
+@router.post("/reset", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
+def reset_database(
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user),
+) -> None:
+    """Reset the entire library to a clean state.
+    
+    Deletes all books, tags, categories, preferences, and reading goals,
+    then reinitializes with seed data.
+    """
+    # Delete in order to respect foreign key constraints
+    db.query(Book).delete()
+    db.query(ReadingGoal).delete()
+    db.query(Tag).delete()
+    db.query(TagCategory).delete()
+    db.query(Preference).delete()
+    db.commit()
+    
+    # Reseed the data
+    seed_all(db)

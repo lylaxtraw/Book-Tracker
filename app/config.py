@@ -31,10 +31,10 @@ class Settings(BaseSettings):
     secret_key: str = "dev-only-change-me"
 
     # The single account that uses this instance.
-    owner_username: str = "koy"
+    owner_username: str = "Koy"
     # Plain password used to bootstrap the account on first boot. It is hashed
     # immediately and never stored in the database in plain form.
-    owner_password: str = "changeme"
+    owner_password: str = "1234"
 
     # Set to False when serving over plain HTTP on localhost.
     secure_cookies: bool = True
