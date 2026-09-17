@@ -917,35 +917,9 @@ function editGoal(year, goal) {
 /* --------------------------------------------------------------- settings */
 
 function applyAccent(hex) {
-  // Set the main flame color
-  document.documentElement.style.setProperty("--flame", hex);
-  
-  // Calculate derived colors from the base hex
-  // For glow: add 40% alpha (66 in hex)
-  document.documentElement.style.setProperty("--flame-glow", `${hex}66`);
-  
-  // For bright: lighten by adding white (simplified - just use the color but could be improved)
-  document.documentElement.style.setProperty("--flame-bright", adjustBrightness(hex, 0.3));
-  
-  // For dim: darken by removing white (simplified)
-  document.documentElement.style.setProperty("--flame-dim", adjustBrightness(hex, -0.3));
-  
-  // Update the color picker value
+  // Only change --accent (used for buttons/chips), not --flame (used for backgrounds)
+  document.documentElement.style.setProperty("--accent", hex);
   $("#accentPicker").value = hex;
-}
-
-/** Adjust brightness of a hex color by a factor (-1 to 1, where negative = darker). */
-function adjustBrightness(hex, factor) {
-  // Parse hex color
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  
-  // Adjust each channel
-  const adjust = (channel) => Math.round(Math.max(0, Math.min(255, channel + (255 * factor))));
-  
-  // Convert back to hex
-  return `#${adjust(r).toString(16).padStart(2, '0')}${adjust(g).toString(16).padStart(2, '0')}${adjust(b).toString(16).padStart(2, '0')}`;
 }
 
 async function savePref(key, value) {
@@ -1158,6 +1132,19 @@ function wire() {
   $("#logoutBtn").addEventListener("click", async () => {
     await api("/api/auth/logout", { method: "POST" });
     location.reload();
+  });
+
+  $("#resetDbBtn").addEventListener("click", async () => {
+    if (!confirm("🗑️  This will delete ALL books and tags. Are you absolutely sure?")) return;
+    if (!confirm("⚠️  Last chance! This cannot be undone. Delete everything?")) return;
+    
+    try {
+      await api("/api/auth/reset", { method: "POST" });
+      toast("✨ Database reset. Page will reload...");
+      setTimeout(() => location.reload(), 1500);
+    } catch (err) {
+      toast(err.message, "error");
+    }
   });
 
   document.addEventListener("keydown", (e) => {
