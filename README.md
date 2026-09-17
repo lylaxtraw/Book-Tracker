@@ -35,7 +35,7 @@ A personal book tracker for managing your reading life: track books you own, wan
 
 ## Live App
 
-**Currently Deploying:** https://bookmark.example.com
+**Currently Deploying:** https://boocker.fly.dev/
 
 To set up your own live instance:
 
@@ -57,6 +57,44 @@ To set up your own live instance:
    - Start tracking!
 
 For detailed setup instructions, see [Deployment Guide](./docs/DEPLOYMENT.md).
+
+---
+
+## Install on Mobile
+
+Bookmark is a Progressive Web App (PWA), which means you can install it directly on your device **without visiting an app store**.
+
+### iOS (iPhone/iPad)
+
+1. Open **Safari** and navigate to your Bookmark instance
+2. Tap the **Share** button (square with arrow)
+3. Scroll down and tap **"Add to Home Screen"**
+4. Enter a name (or use the default "Bookmark")
+5. Tap **"Add"**
+6. The app will now appear on your home screen like a native app
+
+### Android (Phone/Tablet)
+
+1. Open **Chrome** or **Edge** and navigate to your Bookmark instance
+2. Tap the **menu icon** (three dots) in the top-right corner
+3. Tap **"Install app"** (or **"Create shortcut"** on some devices)
+4. Confirm the app details
+5. The app will install and appear on your home screen
+
+### Desktop (Windows/Mac/Linux)
+
+1. Open **Chrome**, **Edge**, or **Brave** browser
+2. Navigate to your Bookmark instance
+3. Click the **install icon** in the address bar (usually on the right side)
+4. Or use the menu: **Menu → "Install [App Name]"**
+5. The app will install like a native desktop application
+
+### Features of the Installed App
+
+- **Offline Access** — Works offline using cached data (changes sync when back online)
+- **App Window** — Runs in its own window, not a browser tab
+- **Fast Loading** — Instant startup, no browser chrome
+- **Notifications Ready** — Can receive push notifications (feature in development)
 
 ---
 
@@ -113,6 +151,7 @@ For developers integrating with Book Tracker:
 ## Documentation
 
 - **[Getting Started](./docs/DEPLOYMENT.md)** — Deploy to Fly.io or Render
+- **[Mobile Installation](./docs/MOBILE.md)** — Install as an app on your phone
 - **[Architecture](./docs/ARCHITECTURE.md)** — How the app is structured
 - **[API Docs](./docs/API.md)** — Complete endpoint reference
 - **[Contributing](./docs/CONTRIBUTING.md)** — Report bugs, request features, contribute code
@@ -138,7 +177,7 @@ You're free to use, modify, and deploy Book Tracker for personal or commercial u
 
 ---
 
-Made with ❤️ for book lovers everywhere.
+Made with love for you, my shrimptastic boy <3
 
 ## Notes for later
 
