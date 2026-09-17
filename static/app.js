@@ -86,6 +86,7 @@ const state = {
   branding: { brand: "CherryStraw", dedication: "", title: "Bookmark" },
   prefs: {},
   filters: { q: "", tagIds: [], sort: "recent", view: "grid" },
+  booting: false, // Guard to prevent duplicate boot() calls
 };
 
 const tagById = (id) => state.tags.find((t) => t.id === id);
@@ -425,7 +426,7 @@ async function openBook(id) {
     try {
       await api(`/api/books/${id}`, { method: "DELETE" });
       closeModal();
-      toast("Removed.");
+      toast(`📚 Removed "${esc(book.title)}" from your library`);
       await refreshTags();
       await loadBooks();
     } catch (err) {
@@ -496,6 +497,7 @@ function renderResults(results) {
 /** Last step before a search hit becomes a book: pick its shelves. */
 function confirmCandidate(candidate) {
   const wishlist = state.tags.find((t) => t && t.role === "wishlist");
+  toast(`📚 Added "${esc(candidate.title)}" to your library`);
   const panel = openModal(`
     <h2 style="font-family:var(--font-display);margin:0 0 4px;font-size:1.2rem">
       ${esc(candidate.title)}</h2>
@@ -692,12 +694,16 @@ function editTag(tag) {
     };
     if (!payload.name) return toast("Give it a name.", "error");
     try {
-      if (isNew) await api("/api/tags", { method: "POST", body: JSON.stringify(payload) });
-      else await api(`/api/tags/${tag.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      if (isNew) {
+        await api("/api/tags", { method: "POST", body: JSON.stringify(payload) });
+        toast(`✨ Created tag "${esc(payload.name)}"`);
+      } else {
+        await api(`/api/tags/${tag.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+        toast(`✏️ Updated tag "${esc(payload.name)}"`);
+      }
       closeModal();
       await refreshTags();
       renderTags();
-      toast("Saved.");
     } catch (err) {
       toast(err.message, "error");
     }
@@ -710,7 +716,7 @@ function editTag(tag) {
       closeModal();
       await refreshTags();
       renderTags();
-      toast("Deleted.");
+      toast(`🗑️ Deleted tag "${esc(tag.name)}"`);
     } catch (err) {
       toast(err.message, "error");
     }
@@ -919,6 +925,10 @@ function applyAccent(hex) {
 async function savePref(key, value) {
   state.prefs[key] = value;
   try {
+    // Save to localStorage for immediate persistence
+    localStorage.setItem(key, String(value));
+  } catch { /* localStorage might be unavailable */ }
+  try {
     await api(`/api/preferences/${encodeURIComponent(key)}`, {
       method: "PUT",
       body: JSON.stringify({ value: String(value) }),
@@ -936,6 +946,8 @@ function download(path) {
 async function refreshTags() {
   try {
     state.categories = await api("/api/tags");
+    // Flatten tags from all categories
+    state.tags = state.categories.flatMap((c) => c.tags || []);
   } catch (err) {
     // If /api/tags fails, create a default structure
     state.categories = [
@@ -952,8 +964,8 @@ async function refreshTags() {
         tags: []
       }
     ];
+    state.tags = [];
   }
-  state.tags = state.categories.flatMap((c) => c.tags || []);
   // Only render filters if app is visible (not during boot transition)
   if (state.view === "library" && !$("#app").hidden) {
     renderFilters();
@@ -961,8 +973,14 @@ async function refreshTags() {
 }
 
 async function boot() {
+  if (state.booting) return; // Prevent duplicate execution
+  state.booting = true;
+  
   const session = await api("/api/auth/session");
-  if (!session.authenticated) return showLogin();
+  if (!session.authenticated) {
+    state.booting = false;
+    return showLogin();
+  }
 
   // Setup branding and preferences BEFORE showing transition
   state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
@@ -992,6 +1010,14 @@ async function boot() {
   
   // Now render filters since app is visible
   renderFilters();
+  
+  // Load saved accent color preference
+  try {
+    const savedAccent = localStorage.getItem("theme.accent") || state.prefs["theme.accent"];
+    if (savedAccent) applyAccent(savedAccent);
+  } catch { /* localStorage might be unavailable */ }
+  
+  state.booting = false; // Reset flag
 }
 
 /* -------------------------------------------------------------- listeners */
