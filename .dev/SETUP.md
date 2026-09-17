@@ -34,8 +34,11 @@ cp .env.example .env
 ```
 
 Edit `.env` and change at minimum:
+- `OWNER_USERNAME`: Your desired login username (default: `Koy`)
+- `OWNER_PASSWORD`: Your desired login password (default: `1234`)
 - `SECRET_KEY`: Generate with `python3 -c "import secrets; print(secrets.token_urlsafe(48))"`
-- `OWNER_PASSWORD`: Your admin password
+
+**Important:** These credentials are only used when the database is first seeded (when it's empty). If you change them later, you must reset the database for the changes to take effect.
 
 ## Step 5: Initialize Database
 
@@ -55,8 +58,8 @@ The app will be available at `http://localhost:8000`
 
 ### Log In
 
-Username: Value from `OWNER_USERNAME` in `.env` (default: admin)
-Password: Value from `OWNER_PASSWORD` in `.env`
+Username: Value from `OWNER_USERNAME` in `.env` (default: `Koy`)
+Password: Value from `OWNER_PASSWORD` in `.env` (default: `1234`)
 
 ## Reset Database
 
@@ -72,9 +75,19 @@ To also reset the test database:
 python .dev/reset_db.py --tests
 ```
 
+### Resetting Credentials
+
+If you changed your username or password in `.env` but can't log in, the database still has the old credentials. Reset it:
+
+1. Edit `.env` with your desired credentials
+2. Run `python .dev/reset_db.py`
+3. The database will be wiped and recreated with your new credentials
+4. Log in with the new username/password
+
 This is useful when:
 - You want to clear all books and tags
 - You want to test the seed data again
+- You changed your credentials and need to update the database
 - You want to reset before running tests
 - You're trying to get back to a known clean state
 
