@@ -86,6 +86,7 @@ const state = {
   branding: { brand: "CherryStraw", dedication: "", title: "Bookmark" },
   prefs: {},
   filters: { q: "", tagIds: [], sort: "recent", view: "grid" },
+  booting: false, // Guard to prevent duplicate boot() calls
 };
 
 const tagById = (id) => state.tags.find((t) => t.id === id);
@@ -133,8 +134,7 @@ async function attemptLogin() {
     });
     $("#loginPass").value = "";
     $("#login").hidden = true;
-    // Show the shark transition animation before loading the app
-    await showTransition();
+    // Load app (which shows shark transition animation)
     await boot();
   } catch (err) {
     error.textContent = err.message;
@@ -237,8 +237,8 @@ async function loadBooks() {
 function renderFilters() {
   const chips = state.categories
     .map((cat) => {
-      if (!cat.tags.length) return "";
-      const inner = cat.tags
+      if (!(cat.tags || []).length) return "";
+      const inner = (cat.tags || [])
         .map((t) => {
           const on = state.filters.tagIds.includes(t.id);
           return `<button class="chip ${on ? "is-on" : ""}" data-tag="${t.id}"
@@ -294,8 +294,8 @@ function openModal(html) {
 function tagPickerHtml(selectedIds) {
   return state.categories
     .map((cat) => {
-      if (!cat.tags.length) return "";
-      const chips = cat.tags
+      if (!(cat.tags || []).length) return "";
+      const chips = (cat.tags || [])
         .map((t) => {
           const on = selectedIds.includes(t.id);
           return `<button type="button" class="chip ${on ? "is-on" : ""}"
@@ -426,7 +426,7 @@ async function openBook(id) {
     try {
       await api(`/api/books/${id}`, { method: "DELETE" });
       closeModal();
-      toast("Removed.");
+      toast(`📚 Removed "${esc(book.title)}" from your library`);
       await refreshTags();
       await loadBooks();
     } catch (err) {
@@ -496,7 +496,8 @@ function renderResults(results) {
 
 /** Last step before a search hit becomes a book: pick its shelves. */
 function confirmCandidate(candidate) {
-  const wishlist = state.tags.find((t) => t.role === "wishlist");
+  const wishlist = state.tags.find((t) => t && t.role === "wishlist");
+  toast(`📚 Added "${esc(candidate.title)}" to your library`);
   const panel = openModal(`
     <h2 style="font-family:var(--font-display);margin:0 0 4px;font-size:1.2rem">
       ${esc(candidate.title)}</h2>
@@ -626,7 +627,7 @@ function renderTags() {
         </div>
         ${cat.description ? `<p class="category__desc">${esc(cat.description)}</p>` : ""}
         <div class="category__tags">
-          ${cat.tags.map((t) => `
+          ${(cat.tags || []).map((t) => `
             <button class="chip" data-edittag="${t.id}" style="--chip:${esc(t.color)}">
               <span class="chip__dot"></span>${esc(t.name)}
               <span class="chip__count">${t.book_count}</span></button>`).join("")
@@ -693,12 +694,16 @@ function editTag(tag) {
     };
     if (!payload.name) return toast("Give it a name.", "error");
     try {
-      if (isNew) await api("/api/tags", { method: "POST", body: JSON.stringify(payload) });
-      else await api(`/api/tags/${tag.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      if (isNew) {
+        await api("/api/tags", { method: "POST", body: JSON.stringify(payload) });
+        toast(`✨ Created tag "${esc(payload.name)}"`);
+      } else {
+        await api(`/api/tags/${tag.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+        toast(`✏️ Updated tag "${esc(payload.name)}"`);
+      }
       closeModal();
       await refreshTags();
       renderTags();
-      toast("Saved.");
     } catch (err) {
       toast(err.message, "error");
     }
@@ -711,7 +716,7 @@ function editTag(tag) {
       closeModal();
       await refreshTags();
       renderTags();
-      toast("Deleted.");
+      toast(`🗑️ Deleted tag "${esc(tag.name)}"`);
     } catch (err) {
       toast(err.message, "error");
     }
@@ -764,7 +769,7 @@ function editCategory(cat) {
   });
 
   $("#ctDelete")?.addEventListener("click", async () => {
-    if (!confirm(`Delete "${cat.name}" and all ${cat.tags.length} tags inside it?`)) return;
+    if (!confirm(`Delete "${cat.name}" and all ${(cat.tags || []).length} tags inside it?`)) return;
     try {
       await api(`/api/categories/${cat.id}`, { method: "DELETE" });
       closeModal();
@@ -912,13 +917,43 @@ function editGoal(year, goal) {
 /* --------------------------------------------------------------- settings */
 
 function applyAccent(hex) {
+  // Set the main flame color
   document.documentElement.style.setProperty("--flame", hex);
+  
+  // Calculate derived colors from the base hex
+  // For glow: add 40% alpha (66 in hex)
   document.documentElement.style.setProperty("--flame-glow", `${hex}66`);
+  
+  // For bright: lighten by adding white (simplified - just use the color but could be improved)
+  document.documentElement.style.setProperty("--flame-bright", adjustBrightness(hex, 0.3));
+  
+  // For dim: darken by removing white (simplified)
+  document.documentElement.style.setProperty("--flame-dim", adjustBrightness(hex, -0.3));
+  
+  // Update the color picker value
   $("#accentPicker").value = hex;
+}
+
+/** Adjust brightness of a hex color by a factor (-1 to 1, where negative = darker). */
+function adjustBrightness(hex, factor) {
+  // Parse hex color
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  
+  // Adjust each channel
+  const adjust = (channel) => Math.round(Math.max(0, Math.min(255, channel + (255 * factor))));
+  
+  // Convert back to hex
+  return `#${adjust(r).toString(16).padStart(2, '0')}${adjust(g).toString(16).padStart(2, '0')}${adjust(b).toString(16).padStart(2, '0')}`;
 }
 
 async function savePref(key, value) {
   state.prefs[key] = value;
+  try {
+    // Save to localStorage for immediate persistence
+    localStorage.setItem(key, String(value));
+  } catch { /* localStorage might be unavailable */ }
   try {
     await api(`/api/preferences/${encodeURIComponent(key)}`, {
       method: "PUT",
@@ -936,7 +971,9 @@ function download(path) {
 
 async function refreshTags() {
   try {
-    state.categories = await api("/api/tags");
+    state.categories = await api("/api/categories");
+    // Flatten tags from all categories
+    state.tags = state.categories.flatMap((c) => c.tags || []);
   } catch (err) {
     // If /api/tags fails, create a default structure
     state.categories = [
@@ -953,23 +990,31 @@ async function refreshTags() {
         tags: []
       }
     ];
+    state.tags = [];
   }
-  state.tags = state.categories.flatMap((c) => c.tags);
-  if (state.view === "library") renderFilters();
+  // Only render filters if app is visible (not during boot transition)
+  if (state.view === "library" && !$("#app").hidden) {
+    renderFilters();
+  }
 }
 
 async function boot() {
-  const session = await api("/api/auth/session");
-  if (!session.authenticated) return showLogin();
-
-  $("#app").hidden = false;
+  if (state.booting) return; // Prevent duplicate execution
+  state.booting = true;
   
-  // Use defaults for branding
+  const session = await api("/api/auth/session");
+  if (!session.authenticated) {
+    state.booting = false;
+    return showLogin();
+  }
+
+  // Setup branding and preferences BEFORE showing transition
   state.branding = { brand: "Boocker", dedication: "", title: "Boocker" };
   state.prefs = {};
 
   $("#transitionBrand").textContent = state.branding.brand;
-  $("#transitionDedication").textContent = state.branding.dedication;
+  $("#transitionSubtitle").textContent = "CherryStraw";
+  $("#transitionDedication").textContent = "With all my love, L.A.";
   $("#settingsBrand").textContent =
     `${state.branding.brand}${state.branding.dedication ? ` \u00B7 ${state.branding.dedication}` : ""}`;
 
@@ -979,13 +1024,30 @@ async function boot() {
   $("#libSort").value = state.filters.sort;
   $("#libViewToggle").textContent = "Grid";
 
-  await refreshTags();
-  await loadBooks();
+  // Load data while transition plays
+  await Promise.all([
+    refreshTags(),
+    loadBooks()
+  ]);
+
+  // Show the beautiful transition, and only show app after it completes
+  await showTransition();
+  $("#app").hidden = false;
+  
+  // Now render filters since app is visible
+  renderFilters();
+  state.booting = false; // Reset flag
 }
 
 /* -------------------------------------------------------------- listeners */
 
 function wire() {
+  // Load saved accent color as soon as possible
+  try {
+    const savedAccent = localStorage.getItem("theme.accent");
+    if (savedAccent) applyAccent(savedAccent);
+  } catch { /* localStorage might be unavailable */ }
+  
   $$(".tab").forEach((tab) =>
     tab.addEventListener("click", () => switchView(tab.dataset.view))
   );

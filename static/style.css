@@ -180,14 +180,28 @@ a { color: var(--flame-bright); }
   text-shadow: 0 2px 12px rgba(138, 111, 232, 0.2);
 }
 
+.transition__subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 4vw, 1.15rem);
+  font-weight: 400;
+  margin: 12px 0 0;
+  color: #e0ecf0;
+  letter-spacing: 0.008em;
+  text-shadow: 0 2px 12px rgba(138, 111, 232, 0.3);
+  opacity: 0;
+  animation: revealeContent 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s forwards;
+}
+
 .transition__dedication {
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(0.85rem, 3vw, 0.95rem);
   font-weight: 300;
   margin: 8px 0 0;
-  color: rgba(224, 236, 240, 0.65);
+  color: #c4d4dc;
   letter-spacing: 0.01em;
+  opacity: 0;
+  animation: revealeContent 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.0s forwards;
 }
 
 /* Small violet accent line */

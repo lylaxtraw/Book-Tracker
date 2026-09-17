@@ -58,6 +58,26 @@ The app will be available at `http://localhost:8000`
 Username: Value from `OWNER_USERNAME` in `.env` (default: admin)
 Password: Value from `OWNER_PASSWORD` in `.env`
 
+## Reset Database
+
+To wipe the database and start fresh with a clean state:
+
+```bash
+python .dev/reset_db.py
+```
+
+To also reset the test database:
+
+```bash
+python .dev/reset_db.py --tests
+```
+
+This is useful when:
+- You want to clear all books and tags
+- You want to test the seed data again
+- You want to reset before running tests
+- You're trying to get back to a known clean state
+
 ## Step 7: Run Tests
 
 ```bash
