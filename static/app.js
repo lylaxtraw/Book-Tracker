@@ -294,8 +294,8 @@ function openModal(html) {
 function tagPickerHtml(selectedIds) {
   return state.categories
     .map((cat) => {
-      if (!cat.tags.length) return "";
-      const chips = cat.tags
+      if (!(cat.tags || []).length) return "";
+      const chips = (cat.tags || [])
         .map((t) => {
           const on = selectedIds.includes(t.id);
           return `<button type="button" class="chip ${on ? "is-on" : ""}"
@@ -769,7 +769,7 @@ function editCategory(cat) {
   });
 
   $("#ctDelete")?.addEventListener("click", async () => {
-    if (!confirm(`Delete "${cat.name}" and all ${cat.tags.length} tags inside it?`)) return;
+    if (!confirm(`Delete "${cat.name}" and all ${(cat.tags || []).length} tags inside it?`)) return;
     try {
       await api(`/api/categories/${cat.id}`, { method: "DELETE" });
       closeModal();
@@ -917,9 +917,35 @@ function editGoal(year, goal) {
 /* --------------------------------------------------------------- settings */
 
 function applyAccent(hex) {
+  // Set the main flame color
   document.documentElement.style.setProperty("--flame", hex);
+  
+  // Calculate derived colors from the base hex
+  // For glow: add 40% alpha (66 in hex)
   document.documentElement.style.setProperty("--flame-glow", `${hex}66`);
+  
+  // For bright: lighten by adding white (simplified - just use the color but could be improved)
+  document.documentElement.style.setProperty("--flame-bright", adjustBrightness(hex, 0.3));
+  
+  // For dim: darken by removing white (simplified)
+  document.documentElement.style.setProperty("--flame-dim", adjustBrightness(hex, -0.3));
+  
+  // Update the color picker value
   $("#accentPicker").value = hex;
+}
+
+/** Adjust brightness of a hex color by a factor (-1 to 1, where negative = darker). */
+function adjustBrightness(hex, factor) {
+  // Parse hex color
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  
+  // Adjust each channel
+  const adjust = (channel) => Math.round(Math.max(0, Math.min(255, channel + (255 * factor))));
+  
+  // Convert back to hex
+  return `#${adjust(r).toString(16).padStart(2, '0')}${adjust(g).toString(16).padStart(2, '0')}${adjust(b).toString(16).padStart(2, '0')}`;
 }
 
 async function savePref(key, value) {
@@ -945,7 +971,7 @@ function download(path) {
 
 async function refreshTags() {
   try {
-    state.categories = await api("/api/tags");
+    state.categories = await api("/api/categories");
     // Flatten tags from all categories
     state.tags = state.categories.flatMap((c) => c.tags || []);
   } catch (err) {
@@ -1010,19 +1036,18 @@ async function boot() {
   
   // Now render filters since app is visible
   renderFilters();
-  
-  // Load saved accent color preference
-  try {
-    const savedAccent = localStorage.getItem("theme.accent") || state.prefs["theme.accent"];
-    if (savedAccent) applyAccent(savedAccent);
-  } catch { /* localStorage might be unavailable */ }
-  
   state.booting = false; // Reset flag
 }
 
 /* -------------------------------------------------------------- listeners */
 
 function wire() {
+  // Load saved accent color as soon as possible
+  try {
+    const savedAccent = localStorage.getItem("theme.accent");
+    if (savedAccent) applyAccent(savedAccent);
+  } catch { /* localStorage might be unavailable */ }
+  
   $$(".tab").forEach((tab) =>
     tab.addEventListener("click", () => switchView(tab.dataset.view))
   );
