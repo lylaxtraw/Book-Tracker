@@ -179,6 +179,7 @@ You're free to use, modify, and deploy Book Tracker for personal or commercial u
 
 Made with love for you, my shrimptastic boy <3
 
+<!--
 ## Notes for later
 
 - `Base.metadata.create_all` handles the schema on boot, which is fine until
@@ -190,4 +191,4 @@ Made with love for you, my shrimptastic boy <3
   phones keep serving the old shell from cache.
 - Covers are hotlinked from Open Library rather than copied. They load over the
   network and are not part of a backup.
-# Book-Tracker
+--->
